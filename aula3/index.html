@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>Fundamentos de IA · Aula 3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap">
+<style>
+/* Deck de aula: barra superior, palco de slides, rodapé de navegação. Paleta Inteli MBA + 6 cores categóricas para clusters. */
+:root{--bg:#e6eaeb;--card:#ffffff;--ink:#2e2640;--body:#3a3a4a;--muted:#757575;--line:#caced6;--cap:#b2b6bf;--teal:#066d73;--teal-txt:#066d73;--mint:#89cea5;--coral:#ff4545;--soft:#f3f5f6;--on-strong:#ffffff;--font:'Manrope',Arial,sans-serif;--mono:'Space Mono','Courier New',monospace;
+--c1:#066d73;--c2:#ff4545;--c3:#6b4fbb;--c4:#d18b00;--c5:#2f7fd6;--c6:#3f9e6a;--noise:#9aa0aa}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#2e2640;--card:#3a3550;--ink:#ffffff;--body:#d0d0d8;--muted:#9898a8;--line:#4a4560;--cap:#6a6a7a;--teal:#0b8a91;--teal-txt:#6fd0d5;--coral:#ff5a5a;--soft:#332d48;--c1:#3fc1c8;--c2:#ff6b6b;--c3:#a68cf0;--c4:#f0b43c;--c5:#6aa9f0;--c6:#6fcf98;--noise:#7a7f8c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#2e2640;--card:#3a3550;--ink:#ffffff;--body:#d0d0d8;--muted:#9898a8;--line:#4a4560;--cap:#6a6a7a;--teal:#0b8a91;--teal-txt:#6fd0d5;--coral:#ff5a5a;--soft:#332d48;--c1:#3fc1c8;--c2:#ff6b6b;--c3:#a68cf0;--c4:#f0b43c;--c5:#6aa9f0;--c6:#6fcf98;--noise:#7a7f8c;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--body);font-family:var(--font);font-size:16px;line-height:1.55;overflow:hidden}
+*{box-sizing:border-box}
+.deck{height:100%;display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;gap:12px;padding-block:10px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line)}
+.crumb{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.stage{flex:1;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;overflow-y:auto;display:none;padding-block:clamp(16px,3.5vh,44px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.slide.active{display:block;animation:enter .4s ease both}
+@keyframes enter{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.inner{max-width:1180px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:clamp(14px,2.2vh,26px)}
+.foot{display:flex;align-items:center;gap:10px;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:max(8px,env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.prog{flex:1;height:3px;background:var(--line);border-radius:2px;overflow:hidden}.prog i{display:block;height:100%;background:var(--teal);width:0;transition:width .3s}
+.count{font-family:var(--mono);font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:4.5em;text-align:center}
+button{font-family:var(--font);font-size:.88rem;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:.45em .9em;cursor:pointer;line-height:1.2}
+button:hover{border-color:var(--teal)}button:focus-visible,input:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
+button.primary{background:var(--teal);color:var(--on-strong);border-color:var(--teal)}
+button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.navb{width:2.4em;padding:.4em 0}
+.kicker{font-family:var(--mono);font-weight:700;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--coral)}
+h1{font-size:clamp(2rem,4.6vw,3.6rem);line-height:1.05;font-weight:800;color:var(--ink);letter-spacing:-.025em;text-wrap:balance;margin:0}
+h2{font-size:clamp(1.45rem,2.6vw,2.25rem);line-height:1.15;font-weight:800;color:var(--ink);letter-spacing:-.015em;text-wrap:balance;margin:0}
+h3{font-size:1.06rem;font-weight:700;color:var(--ink);margin:0 0 .3em}
+p{margin:0;max-width:68ch}.lead{font-size:clamp(1.02rem,1.5vw,1.2rem);max-width:62ch}
+.muted{color:var(--muted)}.small{font-size:.86rem}.cite{font-size:.74rem;color:var(--muted)}a{color:var(--teal-txt)}
+ul.clean{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.55em}ul.clean li{padding-left:1.1em;position:relative}ul.clean li::before{content:"";position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--teal)}
+.eq{font-size:clamp(1.02rem,1.7vw,1.25rem);color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:.55em .9em;display:inline-block;font-style:italic;overflow-x:auto;max-width:100%}.eq .n{font-style:normal}.eq sub,.eq sup{font-size:.68em}
+.tag{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--teal-txt)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,2.5vw,36px);align-items:center}.g2.top{align-items:start}
+.g23{display:grid;grid-template-columns:2fr 3fr;gap:clamp(16px,2.5vw,36px);align-items:center}
+.g32{display:grid;grid-template-columns:3fr 2fr;gap:clamp(16px,2.5vw,36px);align-items:center}.g32.top{align-items:start}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.g2>*,.g23>*,.g32>*,.g3>*,.g4>*{min-width:0}
+@media (max-width:860px){.g2,.g23,.g32,.g3{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.g4{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.panel{background:var(--soft);border-radius:10px;padding:14px 16px}
+.strong{background:var(--teal);color:var(--on-strong);border-color:var(--teal)}.strong h3,.strong .tag,.strong p{color:var(--on-strong)}
+.cap{font-size:.78rem;color:var(--muted)}.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+canvas{display:block;max-width:100%}
+.viz{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.cv{width:100%;aspect-ratio:4/3;max-width:100%}
+.cv.wide{aspect-ratio:16/9}.cv.short{aspect-ratio:4/1}.cv.mid{aspect-ratio:16/10}
+input[type=range]{width:100%;accent-color:var(--teal)}
+label.ctl{display:flex;flex-direction:column;gap:2px;font-size:.82rem;font-weight:600;color:var(--ink);flex:1 1 150px;min-width:0}
+.readout{font-family:var(--mono);font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}.readout b{color:var(--ink)}
+.big-num{font-size:clamp(1.8rem,3.4vw,2.6rem);font-weight:800;color:var(--teal-txt);font-variant-numeric:tabular-nums;line-height:1}
+.cover{background:var(--teal)}.cover h1,.cover .lead{color:var(--on-strong)}.cover .kicker{color:#fff;opacity:.9}.cover .meta{font-family:var(--mono);font-size:.78rem;letter-spacing:.06em;color:#d6f1f2}
+.noisebox{border-radius:12px;overflow:hidden;aspect-ratio:1/1;width:100%;max-width:420px;justify-self:end;background:rgba(0,0,0,.12)}
+.noisebox canvas{width:100%;height:100%}
+.section{background:var(--ink)}.section h1,.section .lead{color:#fff}.section .big{font-family:var(--mono);font-size:clamp(3rem,9vw,7rem);color:var(--coral);line-height:1;font-weight:700}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .section{background:#1a1a2e}}:root[data-theme="dark"] .section{background:#1a1a2e}
+.journey{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.journey .card{display:flex;flex-direction:column;gap:6px;min-width:0}.journey .now{border:2px solid var(--coral)}.journey .num{font-family:var(--mono);font-size:.72rem;color:var(--muted);letter-spacing:.06em}
+@media (max-width:860px){.journey{grid-template-columns:1fr}}
+.pill{display:inline-block;font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;background:var(--coral);color:#fff;border-radius:3px;padding:.15em .45em;vertical-align:middle}
+.pill.t{background:var(--teal)}
+.tw{overflow-x:auto;max-width:100%}table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:560px}
+table.compact{min-width:0;font-size:.8rem}
+th{background:var(--ink);color:var(--bg);text-align:left;padding:.55em .7em;font-weight:700}td{padding:.5em .7em;border-bottom:1px solid var(--line);vertical-align:top;background:var(--card)}td:first-child{font-weight:700;color:var(--ink)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:.78rem}
+.notes{display:none;margin-top:6px;border-left:3px solid var(--coral);background:var(--card);padding:10px 14px;border-radius:0 8px 8px 0;font-size:.86rem;color:var(--body);white-space:pre-line}
+.notes::before{content:"NOTAS DA PROFESSORA";display:block;font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;color:var(--coral);font-weight:700;margin-bottom:4px}
+body.show-notes .notes{display:block}
+ol.q{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:.45em}
+/* mapa de famílias */
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.fam-head{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
+.models{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.model{display:flex;flex-direction:column;gap:6px}
+.model dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:.82rem}
+.model dt{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:.2em}
+.model dd{margin:0}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--mono);font-size:.72rem;border:1px solid var(--line);border-radius:4px;padding:.2em .5em;background:var(--card);color:var(--ink);font-variant-numeric:tabular-nums}
+.chip.win{background:var(--teal);color:var(--on-strong);border-color:var(--teal)}
+.chip.ctr{outline:2px solid var(--coral);outline-offset:1px}
+.baskets{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;font-size:.76rem}
+.baskets div{background:var(--soft);border-radius:6px;padding:4px 8px}
+.baskets b{font-family:var(--mono);color:var(--muted);font-weight:400;margin-right:4px}
+div[style*="flex-direction:column"]>label.ctl,.viz>label.ctl{flex:none}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.76rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.opt{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:.8rem;font-weight:600;color:var(--ink)}.opt .l{min-width:7.5em}.opt button{padding:.3em .65em;font-size:.8rem}
+.shapes{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.shape{flex:1 1 110px;min-width:0;background:var(--soft);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}.shape .dim{font-size:1.1rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}.arr{color:var(--muted);font-weight:700}
+.sgrid{display:flex;flex-direction:column;gap:5px}.srow{display:flex;flex-wrap:wrap;gap:5px;align-items:center}.srow .pid{font-family:var(--mono);font-size:.72rem;color:var(--muted);min-width:2.8em}.srow.both .pid{color:var(--coral);font-weight:700}.srow .chip{min-width:1.9em;text-align:center}.chip.test{background:var(--coral);color:#fff;border-color:var(--coral)}
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat3>*{min-width:0}
+@media (prefers-reduced-motion: reduce){.slide.active{animation:none}*{transition:none!important}}
+</style>
+</head><body>
+<div class="deck">
+<header class="bar"><span class="crumb" id="crumb"></span></header>
+<main class="stage" id="stage">
+
+<!-- 1 CAPA -->
+<section class="slide cover" data-title="Capa"><div class="inner">
+  <div class="g32">
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <span class="kicker">Inteligência Artificial · Aula 3</span>
+      <h1>Aprendizado não supervisionado</h1>
+      <p class="lead">Como treinar e avaliar modelos sem dados rotulados.</p>
+    </div>
+    <div class="noisebox"><canvas id="cv-cover" aria-label="K-means agrupando pontos aleatórios em tempo real"></canvas></div>
+  </div>
+  <div class="notes">A animação da capa executa k-means real (k = 4) sobre conjuntos de pontos sorteados a cada ciclo. Pode ser usada como abertura: "o algoritmo não recebe a informação de quais pontos pertencem a qual grupo".</div>
+</div></section>
+
+<!-- 2 ESTRUTURA -->
+<section class="slide" data-title="Estrutura da disciplina"><div class="inner">
+  <span class="kicker">Estrutura da disciplina</span>
+  <h2>Inteligência Artificial em três aulas</h2>
+  <div class="journey">
+    <div class="card"><span class="num">AULA 1</span><h3>Fundamentos e redes neurais</h3><p class="small">Perceptron, MLP, CNN, transformers.</p></div>
+    <div class="card"><span class="num">AULA 2</span><h3>Aprendizado supervisionado</h3><p class="small">EDA, regressão, classificação.</p></div>
+    <div class="card now"><span class="num">AULA 3 <span class="pill">HOJE</span></span><h3>Aprendizado não supervisionado</h3><p class="small">Treino sem rótulos, modelos, cases.</p></div>
+  </div>
+    <div class="notes">Retomar em 1 minuto a função de perda da Aula 2 (MSE e entropia cruzada). O fio condutor desta aula é a pergunta: sem y, o que entra no lugar da comparação com o rótulo?</div>
+</div></section>
+
+<!-- 3 OBJETIVOS -->
+<section class="slide" data-title="Objetivos"><div class="inner">
+  <span class="kicker">Objetivos de aprendizagem</span>
+  <h2>Ao final da aula</h2>
+  <div class="g4">
+    <div class="card"><h3><b>Explicar</b></h3><p class="small">como um modelo aprende sem rótulos.</p></div>
+    <div class="card"><h3><b>Comparar</b></h3><p class="small">famílias de modelos e suas limitações.</p></div>
+    <div class="card"><h3><b>Selecionar</b></h3><p class="small">o modelo adequado a um problema.</p></div>
+    <div class="card"><h3><b>Avaliar</b></h3><p class="small">um resultado sem gabarito.</p></div>
+  </div>
+  <div class="notes">Roteiro (120 min)
+00–05  Abertura e objetivos
+05–17  Bloco 01: definição, treinamento sem rótulos e avaliação sem gabarito
+17–60  Bloco 02: mapa de famílias; K-means, escolha de k e silhueta; DBSCAN; hierárquico e dendrograma; PCA; Apriori e FP-Growth
+60–85  Bloco 03: discussão dos cases Uber, Airbnb e DINOv2
+85–95  Síntese
+95–120 Revisão das aulas 1 e 2 (slides finais)</div>
+</div></section>
+
+<!-- 4 LEITURAS -->
+<section class="slide" data-title="Leituras"><div class="inner">
+  <span class="kicker">Leituras</span>
+  <h2>Livro-base e artigos de apoio</h2>
+  <div class="g2 top">
+    <div class="card strong">
+      <span class="tag">Livro-base · acesso gratuito</span>
+      <h3 style="margin-top:.4em">An Introduction to Statistical Learning with Applications in Python (ISLP)</h3>
+      <p class="small">James et al., Springer, 2023 · statlearning.com</p>
+      <p class="small" style="margin-top:.6em"><b>Capítulo 12</b> · Unsupervised Learning</p>
+    </div>
+    <ul class="clean small">
+      <li>Seymour et al. Fenótipos de sepse. <i>JAMA</i>, 2019.</li>
+      <li>Grbovic &amp; Cheng. Embeddings no Airbnb. <i>KDD</i>, 2018.</li>
+      <li>Uber Engineering. Risk Entity Watch e uVitals, 2023.</li>
+      <li>Oquab et al. DINOv2. arXiv, 2023.</li>
+      <li>Ester et al. DBSCAN. <i>KDD</i>, 1996.</li>
+    </ul>
+  </div>
+  <div class="notes">O ISLP cobre PCA e clustering com laboratório em Python e é suficiente para a parte expositiva. Regras de associação não estão no ISLP; para Apriori e FP-Growth indicar os artigos originais (Agrawal &amp; Srikant, VLDB 1994; Han, Pei &amp; Yin, SIGMOD 2000), citados nos slides correspondentes.</div>
+</div></section>
+
+<!-- 5 SEÇÃO 01 -->
+<section class="slide section" data-title="Bloco 1 · Treino sem rótulos"><div class="inner">
+  <span class="big">01</span>
+  <h1>Treinamento sem rótulos</h1>
+  <p class="lead">Sem rótulo não significa sem função de perda.</p>
+</div></section>
+
+<!-- 5b DEFINIÇÃO -->
+<section class="slide" data-title="Definição"><div class="inner">
+  <span class="kicker">Definição</span>
+  <h2>Aprendizado não supervisionado</h2>
+  <p class="lead">Métodos que encontram estrutura em dados <b>sem rótulos</b>. O objetivo é descobrir padrões, não prever uma resposta conhecida.</p>
+  <span class="eq">Dados de treino: { x<sub>1</sub>, x<sub>2</sub>, …, x<sub>n</sub> } &nbsp;<span class="n">·</span>&nbsp; sem y</span>
+  <div class="g4" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+    <div class="card"><span class="tag">Grupos</span><p class="small">Clustering</p></div>
+    <div class="card"><span class="tag">Dimensões</span><p class="small">Redução de dimensionalidade</p></div>
+    <div class="card"><span class="tag">Exceções</span><p class="small">Detecção de anomalias</p></div>
+    <div class="card"><span class="tag">Coocorrências</span><p class="small">Regras de associação</p></div>
+    <div class="card"><span class="tag">Vetores</span><p class="small">Aprendizado de representações</p></div>
+  </div>
+  <p class="cite">Baseado em James et al., ISLP, cap. 12, 2023.</p>
+  <div class="notes">Definição do ISLP (cap. 12): conjunto de ferramentas para o cenário em que há apenas as variáveis X1, …, Xp medidas em n observações, sem uma resposta Y associada. Não há interesse em previsão; o objetivo é descobrir informações sobre as próprias medidas (subgrupos, formas de visualizar os dados).
+Consequência central: sem y não há um gabarito para conferir o resultado. Por isso a avaliação é mais subjetiva e depende do domínio, tema retomado no slide de avaliação.
+Os cinco cards antecipam as famílias do mapa do Bloco 02.</div>
+</div></section>
+
+<!-- 6 SUP vs NAO SUP -->
+<section class="slide" data-title="Supervisionado e não supervisionado"><div class="inner">
+  <span class="kicker">Treinamento sem rótulos</span>
+  <h2>O que muda na função de perda</h2>
+  <div class="tw"><table>
+    <thead><tr><th></th><th>Supervisionado</th><th>Não supervisionado</th></tr></thead>
+    <tbody>
+      <tr><td>Dados de treino</td><td>pares (x<sub>i</sub>, y<sub>i</sub>)</td><td>apenas x<sub>i</sub></td></tr>
+      <tr><td>A perda compara</td><td>a previsão f(x<sub>i</sub>) com o rótulo y<sub>i</sub></td><td>o modelo com a estrutura de x</td></tr>
+            <tr><td>Avaliação</td><td>erro em conjunto de teste rotulado</td><td>sem gabarito: métricas internas, replicação, uso</td></tr>
+      <tr><td>Custo dominante</td><td>rotulagem</td><td>interpretação e validação do resultado</td></tr>
+    </tbody>
+  </table></div>
+  <div class="notes">Pergunta de abertura para a turma: "no supervisionado, como o modelo sabe que errou?". Depois da resposta (comparando com y), perguntar o que pode ocupar o lugar de y. As duas respostas principais estão no próximo slide.</div>
+</div></section>
+
+<!-- 7 TRÊS FORMAS -->
+<section class="slide" data-title="Dois sinais de treino"><div class="inner">
+  <span class="kicker">Treinamento sem rótulos</span>
+  <h2>Duas formas de definir o erro sem rótulo</h2>
+  <div class="g2 top">
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
+      <span class="tag">1 · Proximidade</span>
+      <h3>Ficar perto do grupo</h3>
+      <span class="eq"><i>J</i> = Σ<sub>i</sub> ‖x<sub>i</sub> − μ<sub>c(i)</sub>‖<sup>2</sup></span>
+      <p class="small">K-means minimiza a inércia J.</p>
+      <p class="cite">Modelos: K-means · Exemplo: segmentação de clientes</p>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
+      <span class="tag">2 · Reconstrução</span>
+      <h3>O alvo é a entrada</h3>
+      <span class="eq"><i>L</i> = Σ<sub>i</sub> ‖x<sub>i</sub> − g(h(x<sub>i</sub>))‖<sup>2</sup></span>
+      <p class="small">Reconstrução ruim indica anomalia.</p>
+      <p class="cite">Modelos: PCA, autoencoder · Case: Uber</p>
+    </div>
+  </div>
+    <div class="notes">A forma 1 tem animação no Bloco 02 (k-means). A forma 2 aparece no slide de PCA (erro de reconstrução) e no case do Uber.</div>
+</div></section>
+
+<!-- 8 AVALIAÇÃO -->
+<section class="slide" data-title="Avaliação sem gabarito"><div class="inner">
+  <span class="kicker">Avaliação sem rótulos</span>
+  <h2>Quatro formas de validar um resultado não supervisionado</h2>
+  <div class="g4">
+    <div class="card"><span class="tag">Métrica interna</span><p class="small">Inércia, silhueta.</p></div>
+    <div class="card"><span class="tag">Replicação</span><p class="small">Sepse: grupos reencontrados em outra coorte.</p></div>
+    <div class="card"><span class="tag">Tarefa posterior</span><p class="small">Airbnb: teste A/B, CTR +21%.</p></div>
+    <div class="card"><span class="tag">Humano no loop</span><p class="small">Uber: agentes revisam cada alerta.</p></div>
+  </div>
+  <div class="panel small">Métrica interna alta não garante grupo útil.</div>
+  <p class="cite">Seymour et al., JAMA 2019 · Grbovic &amp; Cheng, KDD 2018 · Uber Engineering, Risk Entity Watch, 2023.</p>
+  <div class="notes">Ponto central da aula: no não supervisionado a avaliação é a etapa difícil. Exemplo para discussão rápida: um clustering de clientes com ótima silhueta que apenas separa clientes por região (variável já conhecida) não traz informação nova.</div>
+</div></section>
+
+<!-- 9 SEÇÃO 02 -->
+<section class="slide section" data-title="Bloco 2 · Famílias de modelos"><div class="inner">
+  <span class="big">02</span>
+  <h1>Famílias de modelos</h1>
+  <p class="lead">Grupos, dimensões, anomalias, associações e representações.</p>
+</div></section>
+
+<!-- 10 MAPA -->
+<section class="slide" data-title="Mapa de famílias"><div class="inner">
+  <span class="kicker">Mapa de famílias</span>
+  <h2>Principais modelos de aprendizado não supervisionado</h2>
+  <div class="tabs" id="fam-tabs" role="tablist" aria-label="Famílias de modelos"></div>
+  <div id="fam-panel" style="display:flex;flex-direction:column;gap:12px" aria-live="polite"></div>
+  <p class="cap">Selecione uma família. <span class="pill t">AULA</span> = aprofundado a seguir.</p>
+  <div class="notes">Slide de navegação livre: projetar e pedir que a turma, para cada família, proponha um exemplo do próprio contexto (projetos do módulo). Referências dos modelos: Lloyd (IEEE Trans. Inf. Theory, 1982); Ward (JASA, 1963); Ester et al. (KDD 1996); Pearson (1901) / Hotelling (1933); Liu, Ting &amp; Zhou (ICDM 2008); Schölkopf et al. (Neural Computation 2001); Agrawal &amp; Srikant (VLDB 1994); Han, Pei &amp; Yin (SIGMOD 2000); Hinton &amp; Salakhutdinov (Science 2006); He et al. MAE (CVPR 2022).</div>
+</div></section>
+
+<!-- 11 K-MEANS -->
+<section class="slide" data-title="K-means"><div class="inner">
+  <span class="kicker">Clustering · Agrupamento por centroides</span>
+  <div class="g23">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2>K-means</h2>
+      <ol class="q small">
+        <li>Inicializar k centros μ<sub>1</sub>…μ<sub>k</sub>.</li>
+        <li><b>Atribuir</b> cada ponto ao centro mais próximo.</li>
+        <li><b>Mover</b> cada centro para a média dos pontos atribuídos.</li>
+        <li>Repetir 2 e 3 até as atribuições não mudarem.</li>
+      </ol>
+      <span class="eq"><i>J</i> = Σ<sub>i</sub> ‖x<sub>i</sub> − μ<sub>c(i)</sub>‖<sup>2</sup></span>
+      <p class="small">Converge para um mínimo local.</p>
+      <div class="panel small"><b>Escala</b>: padronizar iguala a escala, não o peso das dimensões. Aumentar k não corrige: o algoritmo subdivide ainda mais a dimensão dominante.</div>
+      <label class="ctl" for="km-k">Número de grupos k: <span class="readout" id="km-kv"><b>3</b></span><input type="range" id="km-k" min="2" max="6" value="3"></label>
+      <div class="row">
+        <button id="km-assign">Atribuir</button><button id="km-move">Mover centros</button>
+        <button class="primary" id="km-run">Executar até convergir</button>
+      </div>
+      <div class="row"><button id="km-init">Nova inicialização</button><button id="km-data">Novos dados</button></div>
+    </div>
+    <div class="viz">
+      <canvas class="cv wide" id="cv-km" aria-label="Dispersão com pontos coloridos por grupo e centros do k-means"></canvas>
+      <canvas class="cv short" id="cv-km-j" style="aspect-ratio:6/1" aria-label="Inércia por passo"></canvas>
+      <div class="readout" id="km-ro"></div>
+      <span class="cap">K-means real, 180 pontos sintéticos. Clique para adicionar pontos.</span>
+    </div>
+  </div>
+  <div class="notes">Sugestão de uso: escolher k = 4 com dados de 3 grupos e mostrar que o algoritmo sempre encontra k grupos, mesmo quando a estrutura real tem menos. Depois clicar várias vezes em "Nova inicialização" + "Executar" para mostrar inércias finais diferentes (mínimos locais). Na prática usa-se k-means++ (Arthur &amp; Vassilvitskii, SODA 2007) e várias inicializações (n_init no scikit-learn).
+Escala: o z-score deixa cada variável com variância 1, mas não equilibra fatores. Se cinco variáveis medem tamanho e uma mede cor, o fator tamanho pesa cinco vezes na distância euclidiana. Com k maior, o k-means faz mais cortes ao longo dessa direção dominante em vez de separar pela outra. Correções: remover ou agregar variáveis redundantes, aplicar PCA antes do clustering ou atribuir pesos explícitos às dimensões.</div>
+</div></section>
+
+<!-- 12 ESCOLHA DE K -->
+<section class="slide" data-title="Escolha de k"><div class="inner">
+  <span class="kicker">Clustering · Escolha de k</span>
+  <div class="g23">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2>Método do cotovelo e coeficiente de silhueta</h2>
+      <p class="small"><b>Cotovelo</b>: ponto em que a queda da inércia deixa de compensar.</p>
+      <p class="small"><b>Silhueta</b>:</p>
+      <ul class="clean small">
+        <li><b>a(i)</b>: distância média de i aos pontos do próprio grupo (coesão).</li>
+        <li><b>b(i)</b>: distância média de i aos pontos do grupo vizinho mais próximo (separação).</li>
+      </ul>
+      <span class="eq"><i>s</i>(i) = ( b(i) − a(i) ) / max{ a(i), b(i) }</span>
+            <div class="row" role="group" aria-label="Conjunto de dados">
+        <button id="ks-d3" aria-pressed="true">3 grupos</button><button id="ks-d5" aria-pressed="false">5 grupos</button><button id="ks-dov" aria-pressed="false">Grupos sobrepostos</button>
+      </div>
+      <div><span class="big-num" id="ks-best">3</span> <span class="readout">k com maior silhueta média</span></div>
+    </div>
+    <div class="viz">
+      <canvas class="cv short" id="cv-ks-pts" style="aspect-ratio:3/1" aria-label="Dados do conjunto selecionado"></canvas>
+      <div class="g2" style="gap:10px">
+        <canvas class="cv" id="cv-ks-j" aria-label="Inércia por k"></canvas>
+        <canvas class="cv" id="cv-ks-s" aria-label="Silhueta média por k"></canvas>
+      </div>
+      <span class="cap">k de 1 a 8, melhor de 6 execuções.</span>
+    </div>
+  </div>
+  <div class="notes">Com "Grupos sobrepostos" o cotovelo fica ambíguo e a silhueta máxima cai: nenhum método substitui o julgamento do domínio. No case de sepse, o número de fenótipos foi escolhido combinando critérios estatísticos (consensus clustering) com interpretabilidade clínica.</div>
+</div></section>
+
+<!-- 13 DBSCAN -->
+<section class="slide" data-title="DBSCAN"><div class="inner">
+  <span class="kicker">Clustering · DBSCAN</span>
+  <div class="g23">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2>Agrupamento por densidade</h2>
+      <ul class="clean small">
+        <li><b>Central</b>: ≥ minPts vizinhos no raio ε.</li>
+        <li><b>Borda</b>: não central, no raio ε de um central.</li>
+        <li><b>Ruído</b>: sem grupo.</li>
+      </ul>
+      <p class="small">Não exige k; aceita formas arbitrárias.</p>
+      <label class="ctl" for="db-eps">Raio ε: <span class="readout" id="db-epsv"></span><input type="range" id="db-eps" min="2" max="16" value="7"></label>
+      <label class="ctl" for="db-min">minPts: <span class="readout" id="db-minv"></span><input type="range" id="db-min" min="2" max="12" value="5"></label>
+      <div class="row" role="group" aria-label="Algoritmo"><button id="db-a-db" aria-pressed="true">DBSCAN</button><button id="db-a-km" aria-pressed="false">K-means (k = 2)</button></div>
+    </div>
+    <div class="viz">
+      <canvas class="cv mid" id="cv-db" aria-label="Duas meias-luas com ruído agrupadas por DBSCAN ou K-means"></canvas>
+      <div class="readout" id="db-ro"></div>
+      <div class="legend"><span><i style="background:var(--c1)"></i>central</span><span><i style="border:2px solid var(--c1);background:transparent"></i>borda</span><span><i style="background:var(--noise)"></i>ruído</span></div>
+      <span class="cap">Passe o cursor para ver o raio ε.</span>
+    </div>
+  </div>
+  <div class="notes">Comparar os dois botões: k-means corta as meias-luas por uma reta (fronteira de Voronoi), porque minimiza distância ao centro. DBSCAN segue a densidade. Ester et al., KDD 1996. Heurística prática para ε: gráfico da distância ao k-ésimo vizinho ordenada (k = minPts), escolhendo o "joelho".</div>
+</div></section>
+
+<!-- 13b HIERÁRQUICO -->
+<section class="slide" data-title="Hierárquico e dendrograma"><div class="inner">
+  <span class="kicker">Clustering · Hierárquico aglomerativo</span>
+  <div class="g23">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2>Agrupamento hierárquico e dendrograma</h2>
+      <ol class="q small">
+        <li>Cada ponto começa como um grupo.</li>
+        <li><b>Unir</b> os dois grupos mais próximos.</li>
+        <li><b>Registrar</b> a altura da fusão no dendrograma.</li>
+        <li>Repetir até restar um único grupo.</li>
+      </ol>
+      <div class="row" role="group" aria-label="Critério de ligação"><button id="hc-l-single" aria-pressed="false">Simples</button><button id="hc-l-complete" aria-pressed="true">Completa</button><button id="hc-l-average" aria-pressed="false">Média</button><button id="hc-l-ward" aria-pressed="false">Ward</button></div>
+      <span class="eq" id="hc-eq"></span>
+      <label class="ctl" for="hc-cut" style="flex:none">Altura do corte: <span class="readout" id="hc-cutv"></span><input type="range" id="hc-cut" min="0" max="1000" value="500"></label>
+      <div class="row" role="group" aria-label="Conjunto de dados"><button id="hc-d-blobs" aria-pressed="true">3 grupos</button><button id="hc-d-moons" aria-pressed="false">Meias-luas</button><button id="hc-sug">Corte no maior salto</button></div>
+      <div><span class="big-num" id="hc-k">3</span> <span class="readout">grupos no corte</span></div>
+    </div>
+    <div class="viz">
+      <div class="g2" style="gap:10px">
+        <canvas class="cv" id="cv-hc" aria-label="Pontos coloridos pelos grupos obtidos no corte"></canvas>
+        <canvas class="cv" id="cv-hc-dend" aria-label="Dendrograma com a linha de corte"></canvas>
+      </div>
+      <div class="readout" id="hc-ro"></div>
+      <span class="cap">Clusterização aglomerativa real (atualização de Lance–Williams). Clique no dendrograma para mover o corte. Pontos cinza: grupos de um único ponto.</span>
+    </div>
+  </div>
+  <div class="notes">Começar com ligação completa e "Corte no maior salto". Depois trocar para "Meias-luas": a ligação simples segue a cadeia de pontos vizinhos e recupera as duas meias-luas; completa e Ward tendem a cortar as meias-luas, como o k-means. O preço da ligação simples é o encadeamento: poucos pontos-ponte entre dois grupos bastam para uni-los.
+Leitura do dendrograma: a altura de cada fusão é a distância entre os grupos unidos, segundo a ligação escolhida. Na ligação completa, é a maior distância entre um ponto de um grupo e um ponto do outro. Um salto grande entre fusões consecutivas indica que grupos bem separados estão sendo forçados a se unir; o corte logo abaixo desse salto é o candidato natural para k. Os grupos são os ramos que cruzam a linha de corte.
+Comparação com k-means: o dendrograma mostra as soluções para todos os k de uma vez e não depende de inicialização aleatória; em contrapartida, exige a matriz de distâncias (O(n²) em memória), a implementação ingênua usada aqui é O(n³) e uma fusão nunca é desfeita.
+Referências: Ward, JASA 1963; Lance &amp; Williams, Computer Journal 1967; Müllner, arXiv 2011. Em Python: scipy.cluster.hierarchy.linkage, dendrogram e fcluster.</div>
+</div></section>
+
+<!-- 14 PCA -->
+<section class="slide" data-title="PCA"><div class="inner">
+  <span class="kicker">Redução de dimensionalidade · PCA</span>
+  <div class="g23">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2>Análise de componentes principais</h2>
+      <p class="small">Direção de maior variância = autovetor de Σ com maior autovalor λ.</p>
+      <span class="eq">max<sub>‖u‖=1</sub> u<sup>T</sup> Σ u &nbsp;⇒&nbsp; Σ u = λ u</span>
+      <p class="small">Mais variância retida = menos erro de reconstrução.</p>
+      <label class="ctl" for="pca-a">Direção de projeção: <span class="readout" id="pca-av"></span><input type="range" id="pca-a" min="0" max="179" value="100"></label>
+      <div class="row"><button class="primary" id="pca-go">Ir para a 1ª componente</button><button id="pca-new">Novos dados</button></div>
+      <div class="g2" style="gap:10px">
+        <div><span class="big-num" id="pca-ret">0%</span><div class="readout">variância retida</div></div>
+        <div><span class="big-num" id="pca-err" style="color:var(--coral)">0</span><div class="readout">erro de reconstrução médio</div></div>
+      </div>
+    </div>
+    <div class="viz">
+      <canvas class="cv mid" id="cv-pca" aria-label="Pontos 2D projetados sobre uma reta"></canvas>
+      <div class="readout" id="pca-ro"></div>
+      <span class="cap">Segmentos = erro de reconstrução.</span>
+    </div>
+  </div>
+  <div class="notes">Mostrar que, girando a reta, a variância retida e o erro de reconstrução somam sempre a variância total. Essa equivalência conecta PCA ao autoencoder: um autoencoder linear com gargalo de dimensão 1 aprende o mesmo subespaço que a 1ª componente. ISLP seção 12.2.</div>
+</div></section>
+
+<!-- 15 APRIORI -->
+<section class="slide" data-title="Apriori"><div class="inner">
+  <span class="kicker">Regras de associação · Apriori</span>
+  <div class="g2 top">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <h2>Conjuntos frequentes e regras X ⇒ Y</h2>
+      <div class="row">
+        <span class="eq" style="font-size:.95rem">sup(X) = |{t : X ⊆ t}| / N</span>
+        <span class="eq" style="font-size:.95rem">conf(X⇒Y) = sup(X∪Y) / sup(X)</span>
+        <span class="eq" style="font-size:.95rem">lift = conf(X⇒Y) / sup(Y)</span>
+      </div>
+      <p class="small"><b>Poda</b>: superconjunto de infrequente é infrequente. <b>Lift &gt; 1</b>: associação acima do acaso.</p>
+      <div class="baskets" id="ap-baskets"></div>
+      <p class="cap">Cestas fictícias.</p>
+    </div>
+    <div class="viz">
+      <div class="row">
+        <label class="ctl" for="ap-sup">Suporte mínimo: <span class="readout" id="ap-supv"></span><input type="range" id="ap-sup" min="2" max="7" value="3"></label>
+        <label class="ctl" for="ap-conf">Confiança mínima: <span class="readout" id="ap-confv"></span><input type="range" id="ap-conf" min="30" max="100" step="5" value="60"></label>
+      </div>
+      <div class="tw"><table class="compact" id="ap-levels"></table></div>
+      <div class="tw" style="max-height:260px;overflow-y:auto"><table class="compact" id="ap-rules"></table></div>
+      <span class="cap">Regras ordenadas por lift.</span>
+    </div>
+  </div>
+  <div class="notes">Agrawal &amp; Srikant, VLDB 1994. Pontos para comentar: (1) a tabela de níveis mostra quantos candidatos foram podados sem contagem, que é o ganho do algoritmo; (2) regras com confiança alta e lift ≈ 1 são triviais (o consequente já é muito frequente, como pão); (3) com suporte mínimo baixo o número de regras explode.</div>
+</div></section>
+
+<!-- 16 FP-GROWTH -->
+<section class="slide" data-title="FP-Growth"><div class="inner">
+  <span class="kicker">Regras de associação · FP-Growth</span>
+  <div class="g23">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2>FP-tree</h2>
+      <ol class="q small">
+        <li>Contar itens; descartar infrequentes.</li>
+        <li>Inserir cestas ordenadas; prefixos comuns compartilham ramo.</li>
+        <li>Minerar a árvore, sem gerar candidatos.</li>
+      </ol>
+      <div class="tw"><table class="compact">
+        <thead><tr><th></th><th>Apriori</th><th>FP-Growth</th></tr></thead>
+        <tbody>
+          <tr><td>Varreduras</td><td>uma por nível</td><td>duas</td></tr>
+          <tr><td>Candidatos</td><td>gera e testa</td><td>não gera</td></tr>
+          <tr><td>Memória</td><td>conjuntos candidatos</td><td>árvore comprimida</td></tr>
+          <tr><td>Resultado</td><td colspan="2">os mesmos conjuntos frequentes</td></tr>
+        </tbody>
+      </table></div>
+      <label class="ctl" for="fp-sup">Suporte mínimo (contagem): <span class="readout" id="fp-supv"></span><input type="range" id="fp-sup" min="2" max="7" value="3"></label>
+    </div>
+    <div class="viz">
+      <canvas class="cv wide" id="cv-fp" aria-label="FP-tree das doze cestas"></canvas>
+      <div class="readout" id="fp-ro"></div>
+      <span class="cap">Mesmas cestas do slide anterior · nó = item:contagem.</span>
+    </div>
+  </div>
+  <div class="notes">Han, Pei &amp; Yin, SIGMOD 2000. Comparar o número de nós da árvore com o total de itens nas cestas (readout): a compressão vem dos prefixos compartilhados. Em scikit-learn não há implementação; em Python usa-se mlxtend (apriori, fpgrowth, association_rules) ou Spark MLlib (FPGrowth) para escala.</div>
+</div></section>
+
+<!-- 21 SEÇÃO 04 -->
+<section class="slide section" data-title="Bloco 3 · Cases"><div class="inner">
+  <span class="big">03</span>
+  <h1>Cases publicados</h1>
+  <p class="lead">Três aplicações documentadas, para discussão em grupo.</p>
+</div></section>
+
+<!-- 23 CASE UBER -->
+<section class="slide" data-title="Case 1 · Uber"><div class="inner">
+  <span class="kicker">Case 1 · Detecção de anomalias · Plataformas</span>
+  <h2>Fraude e monitoramento no Uber</h2>
+  <div class="g32 top">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <ul class="clean small">
+        <li><b>Problema</b>: fraudes novas surgem antes de serem rotuladas.</li>
+        <li><b>Risk Entity Watch</b>: sinaliza contas anômalas; agente revisa cada alerta.</li>
+        <li><b>uVitals</b>: anomalias em séries temporais de pagamentos.</li>
+      </ul>
+      <p class="cite">Uber Engineering Blog: Risk Entity Watch (set. 2023); uVitals (dez. 2023).</p>
+    </div>
+    <div class="card">
+      <h3>Questões para o grupo</h3>
+      <ol class="q small">
+        <li>Por que não só supervisionado?</li>
+        <li>Como definir "normal"?</li>
+        <li>Por que explicar o alerta?</li>
+        <li>Para que servem rótulos aqui?</li>
+      </ol>
+    </div>
+  </div>
+  <div class="notes">Gabarito
+1. Supervisionado só reconhece fraudes já rotuladas; padrões novos não têm exemplos. O não supervisionado detecta desvio do normal sem conhecer o tipo de fraude. Os dois coexistem.
+2. Normalizar por entidade e por tempo (comparar cada conta com o próprio histórico e com pares semelhantes); o blog descreve normalização em série temporal e a existência de vários grupos de comportamento normal. Um único "normal" global gera falsos positivos.
+3. A ação (bloquear conta, reter pagamento) afeta pessoas; o revisor precisa entender o motivo para decidir. Sem explicação o alerta não é acionável e não é auditável.
+4. Avaliação e calibração: escolher limiar, comparar modelos (precisão, recall, F1) e detectar degradação.</div>
+</div></section>
+
+<!-- 24 CASE AIRBNB -->
+<section class="slide" data-title="Case 2 · Airbnb"><div class="inner">
+  <span class="kicker">Case 2 · Embeddings · Marketplace</span>
+  <h2>Embeddings de anúncios no Airbnb</h2>
+  <div class="g32 top">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <ul class="clean small">
+        <li><b>Sinal</b>: cliques da mesma sessão (skip-gram).</li>
+        <li><b>Escala</b>: 800 milhões de sessões, vetores de 32 dimensões.</li>
+        <li><b>Verificação</b>: clusters geográficos sem coordenadas.</li>
+        <li><b>Resultado</b>: CTR +21% no teste A/B.</li>
+      </ul>
+      <p class="cite">Grbovic &amp; Cheng, Real-time Personalization using Embeddings for Search Ranking at Airbnb, KDD 2018 (Best Paper, ADS Track).</p>
+    </div>
+    <div class="card">
+      <h3>Questões para o grupo</h3>
+      <ol class="q small">
+        <li>De onde vem o "rótulo"?</li>
+        <li>O que a janela controla?</li>
+        <li>E um anúncio sem cliques?</li>
+        <li>Por que o teste A/B decide?</li>
+      </ol>
+    </div>
+  </div>
+  <div class="notes">Gabarito
+1. Da coocorrência de cliques na mesma sessão. É produzido pelo comportamento dos usuários, sem anotação; por isso o método é chamado de auto-supervisionado.
+2. Que distância na sequência ainda conta como "similar". Janela grande gera mais pares e mais ruído (cliques de exploração); janela pequena gera relações mais fortes e menos dados.
+3. Cold start: o paper inicializa o vetor com a média de anúncios semelhantes (tipo e faixa de preço) num raio geográfico.
+4. A coerência geográfica é uma verificação de sanidade; o objetivo de negócio é reserva e clique. Só a tarefa posterior (ranking em produção) mede valor.</div>
+</div></section>
+
+<!-- 25 CASE DINOv2 -->
+<section class="slide" data-title="Case 3 · DINOv2"><div class="inner">
+  <span class="kicker">Case 3 · Auto-supervisão · Visão computacional</span>
+  <h2>DINOv2</h2>
+  <div class="g32 top">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <ul class="clean small">
+        <li><b>Dados</b>: 142 milhões de imagens, sem rótulos.</li>
+        <li><b>Método</b>: autodestilação entre recortes da mesma imagem.</li>
+        <li><b>Resultado</b>: vetores prontos para classificador linear, sem ajuste fino.</li>
+      </ul>
+      <p class="cite">Oquab et al., DINOv2: Learning Robust Visual Features without Supervision, arXiv:2304.07193, 2023; Meta AI Blog, abr. 2023.</p>
+    </div>
+    <div class="card">
+      <h3>Questões para o grupo</h3>
+      <ol class="q small">
+        <li>Qual é o par positivo?</li>
+        <li>O que evita vetores iguais?</li>
+        <li>Há intervenção humana?</li>
+        <li>Como usar com 300 imagens?</li>
+      </ol>
+    </div>
+  </div>
+  <div class="notes">Gabarito
+1. Dois recortes/aumentações da mesma imagem. As aumentações definem o que o modelo deve ignorar (cor, escala, posição); são a "regra" que gera o rótulo.
+2. Colapso de representação. No DINO/DINOv2 evitam-se colapsos com centralização e sharpening das saídas do professor, professor como média móvel exponencial e termos de regularização (KoLeo); no contrastivo, os negativos cumprem esse papel. Para graduação basta: "sem um mecanismo contra colapso, a perda é mínima com vetor constante".
+3. Sim: curadoria. Os conjuntos-semente são curados e rotulados; a seleção por similaridade herda escolhas humanas. "Sem rótulo" no treino não significa "sem decisão humana" nos dados.
+4. Congelar o DINOv2, extrair vetores e treinar um classificador linear ou k-NN com as 300 imagens; avaliar com validação cruzada. Ajuste fino só se houver dados suficientes. Conferir a licença vigente do modelo antes de uso comercial.</div>
+</div></section>
+
+<!-- 27 SÍNTESE -->
+<section class="slide" data-title="Síntese"><div class="inner">
+  <span class="kicker">Pontos principais</span>
+  <h2>Síntese da aula</h2>
+  <div class="g3" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+    <div class="card"><span class="tag">1</span><p class="small">A perda vem de proximidade, reconstrução ou pares.</p></div>
+    <div class="card"><span class="tag">2</span><p class="small">K-means exige k; DBSCAN segue densidade; o dendrograma adia a escolha de k.</p></div>
+    <div class="card"><span class="tag">3</span><p class="small">PCA e autoencoder minimizam erro de reconstrução.</p></div>
+    <div class="card"><span class="tag">4</span><p class="small">Apriori e FP-Growth: mesmo resultado; use o lift.</p></div>
+    <div class="card strong"><span class="tag">5</span><p class="small">Validar é a etapa mais difícil.</p></div>
+  </div>
+  <div class="notes">Fechar retomando a pergunta do Bloco 01: "como o modelo sabe que errou?" e pedir que três estudantes respondam com um exemplo diferente cada.</div>
+</div></section>
+
+<!-- REVISÃO -->
+<section class="slide section" data-title="Revisão"><div class="inner">
+  <span class="big">04</span>
+  <h1>Revisão das aulas 1 e 2</h1>
+  <p class="lead">Perceptron, redes convolucionais, overfitting, divisão de dados e estatística descritiva.</p>
+</div></section>
+
+<section class="slide" data-title="Perceptron"><div class="inner">
+  <span class="kicker">Revisão · Perceptron</span>
+  <div class="g23">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2>Perceptron e separabilidade linear</h2>
+      <span class="eq">ŷ = degrau( w<sub>1</sub>x<sub>1</sub> + w<sub>2</sub>x<sub>2</sub> + b )</span>
+      <ul class="clean small">
+        <li>Soma ponderada + bias, seguida de função degrau.</li>
+        <li>Fronteira de decisão: sempre uma reta (hiperplano).</li>
+        <li>Só resolve problemas linearmente separáveis.</li>
+        <li>XOR e XNOR não são linearmente separáveis.</li>
+      </ul>
+      <div class="row" id="pc-g" role="group" aria-label="Função lógica"><button id="pc-AND" aria-pressed="true">AND</button><button id="pc-OR" aria-pressed="false">OR</button><button id="pc-XOR" aria-pressed="false">XOR</button><button id="pc-XNOR" aria-pressed="false">XNOR</button></div>
+      <div class="row"><button class="primary" id="pc-train">Treinar do zero</button></div>
+      <div><span class="big-num" id="pc-err">0</span> <span class="readout">pontos classificados errado</span></div>
+    </div>
+    <div class="viz">
+      <canvas class="cv mid" id="cv-pc" aria-label="Quatro entradas binárias, fronteira de decisão do perceptron e regiões de saída"></canvas>
+      <div class="readout" id="pc-ro"></div>
+      <div class="legend"><span><i style="background:var(--c1)"></i>saída 1</span><span><i style="background:var(--c2)"></i>saída 0</span><span>anel = erro</span></div>
+      <span class="cap">Regra do perceptron real (taxa 0,2, até 30 épocas).</span>
+    </div>
+  </div>
+  <div class="notes">Retomada da Aula 1. Selecionar XOR e treinar: os pesos oscilam e sempre resta ao menos um ponto errado, porque nenhuma reta separa (0,1) e (1,0) de (0,0) e (1,1). O teorema de convergência do perceptron só garante convergência para dados linearmente separáveis (Rosenblatt, 1958; Minsky &amp; Papert, 1969). XNOR é a negação do XOR e tem o mesmo problema. Solução: camada oculta (MLP).</div>
+</div></section>
+
+<section class="slide" data-title="Camada convolucional"><div class="inner">
+  <span class="kicker">Revisão · Redes convolucionais</span>
+  <div class="g2 top">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2>Parâmetros, padding e pooling</h2>
+      <span class="eq">parâmetros = F × (k<sub>h</sub> × k<sub>w</sub> × C<sub>in</sub>) + F</span>
+      <p class="small">Exemplo: 32 × (3 × 3 × 1) + 32 = <b>320</b></p>
+      <ul class="clean small">
+        <li><b>Padding same</b> com stride 1: preserva altura e largura.</li>
+        <li><b>Pooling</b>: reduz só altura e largura. Os canais não mudam.</li>
+        <li>Pooling não tem parâmetros.</li>
+      </ul>
+    </div>
+    <div class="viz">
+      <div class="row">
+        <label class="ctl" for="cn-h">Entrada (altura × largura): <span class="readout" id="cn-hv"></span><input type="range" id="cn-h" min="8" max="64" step="4" value="28"></label>
+        <label class="ctl" for="cn-f">Filtros F: <span class="readout" id="cn-fv"></span><input type="range" id="cn-f" min="4" max="128" step="4" value="32"></label>
+      </div>
+      <div class="opt"><span class="l">Canais C<sub>in</sub></span><span class="row" id="cn-c"></span></div>
+      <div class="opt"><span class="l">Kernel</span><span class="row" id="cn-k"></span></div>
+      <div class="opt"><span class="l">Padding</span><span class="row" id="cn-p"></span></div>
+      <div class="opt"><span class="l">Stride</span><span class="row" id="cn-s"></span></div>
+      <div class="opt"><span class="l">Pooling</span><span class="row" id="cn-pool"></span></div>
+      <div class="shapes" id="cn-shapes"></div>
+      <div><span class="big-num" id="cn-par">320</span> <span class="readout">parâmetros · <span id="cn-form"></span></span></div>
+    </div>
+  </div>
+  <div class="notes">Um bias por filtro. O exemplo usa entrada em tons de cinza (C = 1); com RGB (C = 3): 32 × 27 + 32 = 896.
+Saída da convolução: same → ⌈H / stride⌉; valid → ⌊(H − k) / stride⌋ + 1. Com same e stride 2 a altura e a largura caem pela metade.
+Max pooling 2×2 com stride 2 divide altura e largura por 2, mantém os canais e não tem parâmetros. Erro comum em questões: atribuir ao pooling a redução de canais (isso é feito por convolução 1×1).</div>
+</div></section>
+
+<!-- 29 CNNs: REGULARIZAÇÃO E AUGMENTATION -->
+<section class="slide" data-title="CNNs · regularização e augmentation"><div class="inner">
+  <span class="kicker">Revisão · CNNs</span>
+  <h2>Regularização e data augmentation</h2>
+  <div class="g2 top">
+    <div class="viz">
+      <span class="tag">Regularização</span>
+      <ul class="clean small">
+        <li><b>Dropout</b>: desativa neurônios ao acaso com probabilidade p, só no treino.</li>
+        <li><b>Weight decay</b>: penaliza pesos grandes na perda, <i>L</i>′ = <i>L</i> + λ‖<i>w</i>‖<sup>2</sup>.</li>
+        <li><b>Early stopping</b>: interrompe o treino quando a perda de validação para de cair.</li>
+      </ul>
+      <canvas class="cv" id="cv-drop" style="aspect-ratio:7/2" aria-label="Rede 4-8-8-2 com neurônios ocultos desativados pelo dropout"></canvas>
+      <label class="ctl" for="dr-p" style="flex:none">Probabilidade de dropout p: <span class="readout" id="dr-pv"></span><input type="range" id="dr-p" min="0" max="80" step="5" value="50"></label>
+      <div class="row"><button id="dr-train" aria-pressed="true">Treino</button><button id="dr-infer" aria-pressed="false">Inferência</button><button id="dr-new">Sortear máscara</button><button class="primary" id="dr-anim" aria-pressed="false">Animar</button></div>
+      <div class="readout" id="dr-ro"></div>
+      <div class="panel small"><b>Regularização tende a reduzir a acurácia de treino.</b> A escolha do modelo usa a validação.</div>
+    </div>
+    <div class="viz">
+      <span class="tag">Data augmentation</span>
+      <p class="small">Transformações que preservam o rótulo geram uma versão diferente de cada imagem de treino a cada época.</p>
+      <canvas class="cv" id="cv-aug" style="aspect-ratio:5/2" aria-label="Imagem original de uma folha e sete variações aumentadas"></canvas>
+      <div class="row"><button class="primary" id="aug-new">Novas variações</button></div>
+      <span class="cap">Folha com lesões gerada proceduralmente (64 × 64 px), não é uma foto real. As transformações são calculadas no navegador.</span>
+      <div class="panel small"><b>Augmentation só no treino.</b> Validação e teste usam dados reais, sem transformação.</div>
+    </div>
+  </div>
+  <div class="notes">Slide de ligação com a Aula 1 (CNN) e com o case do DINOv2: as mesmas transformações usadas como augmentation geram os pares positivos do SimCLR e do DINOv2.
+Dropout: Srivastava et al., JMLR 2014. Na implementação usual (dropout invertido), as ativações mantidas são multiplicadas por 1/(1−p) no treino; na inferência todos os neurônios ficam ativos, sem sorteio. Usar "Animar" para mostrar que cada passo de treino vê uma sub-rede diferente.
+Weight decay: com SGD equivale à penalidade L2 da fórmula; com Adam não equivale, e por isso existe o AdamW (Loshchilov &amp; Hutter, ICLR 2019).
+Augmentation: Shorten &amp; Khoshgoftaar, Journal of Big Data, 2019. A transformação precisa preservar o rótulo: espelhar uma placa com seta ou o dígito 6 rotacionado 180° muda a classe. Em áudio, as aumentações atuam no espectrograma: deslocamento temporal, ruído de fundo, mascaramento de faixas de frequência (Park et al., SpecAugment, Interspeech 2019).
+Erros comuns para discutir: aplicar augmentation na validação (a métrica deixa de medir o desempenho em dados reais); remover a regularização porque a acurácia de treino caiu; escolher o modelo pela menor diferença entre treino e validação em vez do melhor desempenho de validação.</div>
+</div></section>
+
+<section class="slide" data-title="Divisão de dados"><div class="inner">
+  <span class="kicker">Revisão · Divisão treino e teste</span>
+  <div class="g23">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2>Estratificação ≠ divisão por grupo</h2>
+      <ul class="clean small">
+        <li><b>Estratificar</b>: mesma proporção de classes nos conjuntos.</li>
+        <li>Não impede que o mesmo grupo (ex.: paciente) apareça nos dois.</li>
+        <li><b>Por grupo</b>: cada grupo vai inteiro para um só conjunto.</li>
+      </ul>
+      <div class="row" role="group" aria-label="Tipo de divisão"><button id="sp-strat" aria-pressed="true">Estratificada</button><button id="sp-group" aria-pressed="false">Por grupo</button><button id="sp-new">Sortear de novo</button></div>
+      <div><span class="big-num" id="sp-both" style="color:var(--coral)">0</span> <span class="readout">pacientes no treino e no teste</span></div>
+    </div>
+    <div class="viz">
+      <div class="sgrid" id="sp-grid"></div>
+      <div class="readout" id="sp-ro"></div>
+      <div class="legend"><span><i style="background:var(--card);border:1px solid var(--line)"></i>treino</span><span><i style="background:var(--coral)"></i>teste</span><span>+ / − = classe</span></div>
+      <span class="cap">10 pacientes fictícios, de 3 a 6 amostras cada, 25% para teste.</span>
+    </div>
+  </div>
+  <div class="notes">Exemplo típico: várias imagens ou exames do mesmo paciente. Na divisão estratificada o modelo vê o paciente no treino e é avaliado nele no teste; a métrica fica otimista (vazamento de dados).
+scikit-learn: GroupKFold, GroupShuffleSplit, StratifiedGroupKFold. Na divisão por grupo a proporção de classes fica aproximada, não exata.</div>
+</div></section>
+
+<section class="slide" data-title="Distribuição e percentis"><div class="inner">
+  <span class="kicker">Revisão · Estatística descritiva</span>
+  <div class="g23">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h2>Distribuição assimétrica e percentis</h2>
+      <ul class="clean small">
+        <li>À direita: moda &lt; mediana &lt; média.</li>
+        <li>À esquerda: média &lt; mediana &lt; moda.</li>
+        <li>A cauda puxa a média; a mediana é robusta.</li>
+        <li>Percentil p: p% dos dados abaixo. P50 = mediana.</li>
+        <li>IQR = P75 − P25.</li>
+      </ul>
+      <label class="ctl" for="ds-a">Assimetria: <span class="readout" id="ds-av"></span><input type="range" id="ds-a" min="0" max="100" value="60"></label>
+      <div class="row" role="group" aria-label="Direção"><button id="ds-r" aria-pressed="true">À direita</button><button id="ds-l" aria-pressed="false">À esquerda</button></div>
+    </div>
+    <div class="viz">
+      <canvas class="cv mid" id="cv-dist" aria-label="Histograma com média, mediana, moda e percentis"></canvas>
+      <div class="stat3">
+        <div><span class="big-num" id="ds-mean" style="color:var(--coral)">0</span><div class="readout">média</div></div>
+        <div><span class="big-num" id="ds-med" style="color:var(--c1)">0</span><div class="readout">mediana</div></div>
+        <div><span class="big-num" id="ds-mode" style="color:var(--c3)">0</span><div class="readout">moda</div></div>
+      </div>
+      <div class="readout" id="ds-ro"></div>
+      <span class="cap">4.000 amostras sintéticas. Moda = classe mais alta do histograma suavizado.</span>
+    </div>
+  </div>
+  <div class="notes">Com assimetria 0 as três medidas coincidem. Ao aumentar, a média se afasta primeiro, na direção da cauda.
+A ordem moda &lt; mediana &lt; média vale para distribuições unimodais com assimetria moderada; há exceções (von Hippel, Journal of Statistics Education, 2005).
+Exemplos de assimetria à direita: renda, tempo de resposta, preço de imóveis. Percentis calculados por interpolação linear (padrão do numpy).</div>
+</div></section>
+
+</main>
+<footer class="foot">
+  <button class="navb" id="prev" aria-label="Slide anterior">←</button><span class="count" id="count"></span>
+  <button class="navb" id="next" aria-label="Próximo slide">→</button><div class="prog"><i id="progbar"></i></div>
+  <button id="notes-btn" aria-pressed="false">Notas</button><button id="fs-btn">Tela cheia</button>
+</footer>
+</div>
+
+<script>
+(function(){
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const C=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())}
+const fmt=(v,d=2)=>v.toFixed(d).replace('.',',');
+function fit(cv){const r=cv.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2),w=Math.max(10,Math.round(r.width)),h=Math.max(10,Math.round(r.height));if(cv.width!==w*dpr||cv.height!==h*dpr){cv.width=w*dpr;cv.height=h*dpr}const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return {ctx,w,h}}
+const hooks={};let raf=null;
+function loop(fn){stopLoop();const step=t=>{if(fn(t)!==false)raf=requestAnimationFrame(step);else raf=null};raf=requestAnimationFrame(step)}
+function stopLoop(){if(raf)cancelAnimationFrame(raf);raf=null}
+const PAL=()=>['--c1','--c2','--c3','--c4','--c5','--c6'].map(C);
+function setPressed(btns,on){btns.forEach(b=>b.setAttribute('aria-pressed',b===on?'true':'false'))}
+const d2=(a,b)=>{const dx=a[0]-b[0],dy=a[1]-b[1];return dx*dx+dy*dy};
+// mapeamento [0,1]^2 -> canvas
+function frame(w,h,pad=14){const s=Math.min(w,h)-2*pad,ox=(w-s)/2,oy=(h-s)/2;return{sx:x=>ox+x*s,sy:y=>oy+(1-y)*s,ix:px=>(px-ox)/s,iy:py=>1-(py-oy)/s,s,ox,oy}}
+function blobs(seed,centers,n,sd){const r=rng(seed),pts=[];for(let i=0;i<n;i++){const c=centers[i%centers.length];pts.push([Math.min(.98,Math.max(.02,c[0]+gauss(r)*sd)),Math.min(.98,Math.max(.02,c[1]+gauss(r)*sd))])}return pts}
+// ---------- k-means ----------
+function kmAssign(pts,cent){return pts.map(p=>{let b=0,bd=1e9;cent.forEach((c,j)=>{const d=d2(p,c);if(d<bd){bd=d;b=j}});return b})}
+function kmUpdate(pts,lab,cent){return cent.map((c,j)=>{let sx=0,sy=0,n=0;pts.forEach((p,i)=>{if(lab[i]===j){sx+=p[0];sy+=p[1];n++}});return n?[sx/n,sy/n]:c.slice()})}
+function kmJ(pts,lab,cent){let s=0;pts.forEach((p,i)=>s+=d2(p,cent[lab[i]]));return s}
+function kmRandInit(pts,k,r){const idx=new Set();while(idx.size<Math.min(k,pts.length))idx.add(Math.floor(r()*pts.length));return [...idx].map(i=>pts[i].slice())}
+function kmFull(pts,k,r,iters=100){let cent=kmRandInit(pts,k,r),lab=kmAssign(pts,cent);for(let t=0;t<iters;t++){cent=kmUpdate(pts,lab,cent);const nl=kmAssign(pts,cent);if(nl.every((v,i)=>v===lab[i])){lab=nl;break}lab=nl}return{cent,lab,J:kmJ(pts,lab,cent)}}
+function kmBest(pts,k,r,tries){let best=null;for(let i=0;i<tries;i++){const s=kmFull(pts,k,r);if(!best||s.J<best.J)best=s}return best}
+function silhouette(pts,lab,k){const n=pts.length;let tot=0;const D=pts.map(p=>pts.map(q=>Math.sqrt(d2(p,q))));const sizes=Array(k).fill(0);lab.forEach(l=>sizes[l]++);for(let i=0;i<n;i++){const sum=Array(k).fill(0);for(let j=0;j<n;j++)if(j!==i)sum[lab[j]]+=D[i][j];const li=lab[i];if(sizes[li]<=1)continue;const a=sum[li]/(sizes[li]-1);let b=1e9;for(let c=0;c<k;c++)if(c!==li&&sizes[c]>0)b=Math.min(b,sum[c]/sizes[c]);tot+=(b-a)/Math.max(a,b)}return tot/n}
+function drawLine(ctx,vals,w,h,opt){const pad={l:38,r:10,t:16,b:22};const n=vals.length;ctx.clearRect(0,0,w,h);if(!n)return;const xs=opt.xs||vals.map((_,i)=>i);let lo=opt.min!=null?opt.min:Math.min(...vals),hi=opt.max!=null?opt.max:Math.max(...vals);if(hi-lo<1e-9){hi=lo+1}const X=i=>pad.l+(n<=1?0:(i/(n-1))*(w-pad.l-pad.r)),Y=v=>h-pad.b-(v-lo)/(hi-lo)*(h-pad.t-pad.b);ctx.strokeStyle=C('--line');ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,h-pad.b);ctx.lineTo(w-pad.r,h-pad.b);ctx.stroke();ctx.fillStyle=C('--muted');ctx.font='10px '+C('--mono');ctx.textAlign='right';ctx.fillText(opt.fmt(hi),pad.l-4,pad.t+4);ctx.fillText(opt.fmt(lo),pad.l-4,h-pad.b);ctx.textAlign='left';ctx.fillText(opt.title,pad.l+4,pad.t-4);ctx.textAlign='center';if(opt.xlabels)opt.xlabels.forEach((t,i)=>ctx.fillText(t,X(i),h-6));ctx.strokeStyle=opt.color;ctx.lineWidth=2;ctx.beginPath();vals.forEach((v,i)=>{i?ctx.lineTo(X(i),Y(v)):ctx.moveTo(X(i),Y(v))});ctx.stroke();vals.forEach((v,i)=>{ctx.fillStyle=(opt.hl===i)?C('--coral'):opt.color;ctx.beginPath();ctx.arc(X(i),Y(v),(opt.hl===i)?5:2.6,0,7);ctx.fill()})}
+function drawPts(ctx,F,pts,cols,rad=3.2){pts.forEach((p,i)=>{ctx.fillStyle=cols[i];ctx.beginPath();ctx.arc(F.sx(p[0]),F.sy(p[1]),rad,0,7);ctx.fill()})}
+function drawCenter(ctx,F,c,col){const x=F.sx(c[0]),y=F.sy(c[1]);ctx.fillStyle=C('--card');ctx.strokeStyle=C('--ink');ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y-9);ctx.lineTo(x+9,y);ctx.lineTo(x,y+9);ctx.lineTo(x-9,y);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,3.5,0,7);ctx.fill()}
+
+// ---------- CAPA ----------
+(function(){const cv=$('#cv-cover');let st=null,last=0,seed=11;
+ function newSet(){const r=rng(seed++);const cs=[];for(let i=0;i<4;i++)cs.push([.18+r()*.64,.18+r()*.64]);const pts=blobs(seed*7,cs,140,.07);const r2=rng(seed*13);const cent=kmRandInit(pts,4,r2);st={pts,cent,lab:kmAssign(pts,cent),phase:0,done:false,hold:0}}
+ function draw(){const {ctx,w,h}=fit(cv);ctx.clearRect(0,0,w,h);const F=frame(w,h,18);const cols=['#ffffff','#89cea5','#ffb3b3','#ffd27a'];
+  st.pts.forEach((p,i)=>{const c=st.cent[st.lab[i]];ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(F.sx(p[0]),F.sy(p[1]));ctx.lineTo(F.sx(c[0]),F.sy(c[1]));ctx.stroke()});
+  drawPts(ctx,F,st.pts,st.lab.map(l=>cols[l]),3);st.cent.forEach((c,j)=>{const x=F.sx(c[0]),y=F.sy(c[1]);ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,9,0,7);ctx.stroke();ctx.fillStyle=cols[j];ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill()})}
+ function step(){if(st.done){st.hold++;if(st.hold>5)newSet();return}const nc=kmUpdate(st.pts,st.lab,st.cent);st.cent=nc;const nl=kmAssign(st.pts,nc);if(nl.every((v,i)=>v===st.lab[i]))st.done=true;st.lab=nl}
+ function finish(){while(!st.done)step()}
+ hooks['Capa']={enter(){if(!st)newSet();if(reduce){finish();draw();return}draw();loop(t=>{if(t-last>650){last=t;step();draw()}})},resize(){if(st)draw()}};
+})();
+
+// ---------- MAPA DE FAMÍLIAS ----------
+(function(){const F=[
+ {id:'cl',name:'Clustering',q:'Quais exemplos são parecidos entre si?',out:'um rótulo de grupo por exemplo',m:[
+  {n:'K-means',ref:'Lloyd, 1982',aula:1,how:'Alterna atribuição ao centro mais próximo e recálculo das médias, minimizando a inércia.',use:'Grupos compactos e de tamanho parecido; grandes volumes.',lim:'Exige k; supõe grupos convexos; sensível à escala e a outliers.',ex:'Fenótipos de sepse (consensus k-means).'},
+  {n:'Hierárquico aglomerativo',ref:'Ward, 1963',aula:1,how:'Une sucessivamente os dois grupos mais próximos e registra as fusões num dendrograma.',use:'Conjuntos de até alguns milhares de pontos; interesse na hierarquia; k decidido depois, pelo corte.',lim:'Custo O(n²) em memória; fusões não são desfeitas.',ex:'Taxonomias de produtos; agrupamento de genes.'},
+  {n:'DBSCAN',ref:'Ester et al., 1996',aula:1,how:'Agrupa pontos centrais (≥ minPts vizinhos no raio ε) e os alcançáveis a partir deles; o resto é ruído.',use:'Formas arbitrárias, presença de ruído, k desconhecido.',lim:'Grupos com densidades muito diferentes; escolha de ε.',ex:'Pontos de GPS, nuvens de pontos LiDAR.'}]},
+ {id:'dr',name:'Redução de dimensionalidade',q:'Dá para representar os dados com menos variáveis?',out:'coordenadas em um espaço menor',m:[
+  {n:'PCA',ref:'Pearson, 1901; Hotelling, 1933',aula:1,how:'Projeta nos autovetores da covariância de maior autovalor (direções de maior variância).',use:'Compressão, remoção de colinearidade, visualização linear, pré-processamento.',lim:'Captura apenas relações lineares; sensível à escala.',ex:'Eigenfaces; pré-processamento antes do k-means.'}]},
+ {id:'an',name:'Detecção de anomalias',q:'O que foge do padrão?',out:'um escore de anomalia por exemplo',m:[
+  {n:'Isolation Forest',ref:'Liu, Ting & Zhou, 2008',how:'Árvores com cortes aleatórios; anomalias ficam isoladas com poucos cortes.',use:'Dados tabulares, alta dimensão, fraude.',lim:'Anomalias agrupadas podem se mascarar.',ex:'Detecção de transações suspeitas.'},
+  {n:'One-Class SVM',ref:'Schölkopf et al., 2001',how:'Aprende uma fronteira que envolve os dados normais.',use:'Conjuntos pequenos e limpos.',lim:'Escala mal com n; sensível ao kernel.',ex:'Detecção de intrusão em redes.'},
+  {n:'Erro de reconstrução',ref:'autoencoder ou PCA',how:'Treina reconstrução no normal; escore = ‖x − x̂‖.',use:'Sinais, imagens, séries temporais.',lim:'Pode aprender a reconstruir anomalias se estiverem no treino.',ex:'Inspeção visual de defeitos.'}]},
+ {id:'as',name:'Regras de associação',q:'O que costuma aparecer junto?',out:'regras X ⇒ Y com suporte, confiança e lift',m:[
+  {n:'Apriori',ref:'Agrawal & Srikant, 1994',aula:1,how:'Gera candidatos nível a nível e poda pela propriedade: superconjunto de infrequente é infrequente.',use:'Cestas de compras, logs de eventos de tamanho moderado.',lim:'Uma varredura por nível; explosão de candidatos com suporte baixo.',ex:'Análise de cesta em varejo.'},
+  {n:'FP-Growth',ref:'Han, Pei & Yin, 2000',aula:1,how:'Comprime as transações numa FP-tree e minera padrões recursivamente, sem candidatos.',use:'Bases maiores; disponível em Spark MLlib.',lim:'A árvore pode não caber na memória.',ex:'Recomendação "comprados juntos".'}]},
+ {id:'rp',name:'Representações neurais',q:'Qual vetor resume bem cada exemplo?',out:'um embedding por exemplo, reutilizável',m:[
+  {n:'Autoencoder',ref:'Hinton & Salakhutdinov, 2006',how:'Codificador comprime, decodificador reconstrói; o gargalo é a representação.',use:'Compressão não linear, anomalias, pré-treino.',lim:'Pode copiar a entrada se o gargalo for largo.',ex:'Deep Patient (Miotto et al., 2016).'},
+  {n:'Modelos generativos',ref:'VAE 2014; GAN 2014; difusão 2020',how:'Aprendem a distribuição dos dados para gerar novos exemplos.',use:'Síntese de dados, inpainting, aumento de dados.',lim:'Avaliação difícil; custo de treino.',ex:'Geração de imagens sintéticas.'}]}];
+ const tabs=$('#fam-tabs'),panel=$('#fam-panel');
+ F.forEach((f,i)=>{const b=document.createElement('button');b.textContent=f.name;b.id='fam-'+f.id;b.setAttribute('role','tab');b.setAttribute('aria-pressed',i?'false':'true');b.onclick=()=>{setPressed($$('button',tabs),b);show(f)};tabs.appendChild(b)});
+ const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+ function show(f){panel.innerHTML='<div class="fam-head"><h3 style="margin:0">'+esc(f.q)+'</h3><span class="readout">Saída: <b>'+esc(f.out)+'</b></span></div><div class="models">'+f.m.map(m=>'<div class="card model"><div><h3 style="margin:0">'+esc(m.n)+(m.aula?' <span class="pill t">AULA</span>':'')+'</h3><span class="cite">'+esc(m.ref)+'</span></div><dl><dt>Como</dt><dd>'+esc(m.how)+'</dd><dt>Usar</dt><dd>'+esc(m.use)+'</dd><dt>Limite</dt><dd>'+esc(m.lim)+'</dd></dl></div>').join('')+'</div>'}
+ show(F[0]);
+})();
+
+// ---------- K-MEANS ----------
+(function(){const cv=$('#cv-km'),cj=$('#cv-km-j');let pts,cent,lab,hist,iter,k=3,dseed=5,iseed=100,running=false,lastT=0,phase='assign';
+ function gen(){const r=rng(dseed);const cs=[[.25,.7],[.7,.75],[.5,.25]];pts=blobs(dseed*31,cs,180,.075)}
+ function init(){cent=kmRandInit(pts,k,rng(iseed++));lab=null;hist=[];iter=0;phase='assign'}
+ function doAssign(){lab=kmAssign(pts,cent);hist.push(kmJ(pts,lab,cent));phase='move'}
+ function doMove(){if(!lab)doAssign();const nc=kmUpdate(pts,lab,cent);cent=nc;iter++;hist.push(kmJ(pts,lab,cent));phase='assign'}
+ function converged(){if(!lab)return false;const nl=kmAssign(pts,cent);if(!nl.every((v,i)=>v===lab[i]))return false;const nc=kmUpdate(pts,lab,cent);return nc.every((c,j)=>Math.abs(c[0]-cent[j][0])+Math.abs(c[1]-cent[j][1])<1e-12)}
+ function settle(){init();doAssign();for(let t=0;t<60;t++){doMove();const nl=kmAssign(pts,cent);const same=nl.every((v,i)=>v===lab[i]);doAssign();if(same)break}}
+ function draw(){const {ctx,w,h}=fit(cv);ctx.clearRect(0,0,w,h);const F=frame(w,h);const P=PAL();
+  ctx.strokeStyle=C('--line');ctx.strokeRect(F.ox,F.oy,F.s,F.s);
+  if(lab){pts.forEach((p,i)=>{const c=cent[lab[i]];ctx.strokeStyle=P[lab[i]];ctx.globalAlpha=.18;ctx.beginPath();ctx.moveTo(F.sx(p[0]),F.sy(p[1]));ctx.lineTo(F.sx(c[0]),F.sy(c[1]));ctx.stroke()});ctx.globalAlpha=1}
+  drawPts(ctx,F,pts,pts.map((_,i)=>lab?P[lab[i]]:C('--noise')));cent.forEach((c,j)=>drawCenter(ctx,F,c,P[j]));
+  const g=fit(cj);drawLine(g.ctx,hist,g.w,g.h,{title:'Inércia J por passo',fmt:v=>fmt(v,2),color:C('--teal'),min:0});
+  const J=hist.length?hist[hist.length-1]:null;$('#km-ro').innerHTML='k = <b>'+k+'</b> · iteração <b>'+iter+'</b> · J = <b>'+(J==null?'—':fmt(J,3))+'</b> · '+(converged()?'<b>convergiu</b>':'próximo passo: <b>'+(phase==='assign'?'atribuir':'mover centros')+'</b>');$('#km-kv').innerHTML='<b>'+k+'</b>'}
+ $('#km-assign').onclick=()=>{running=false;doAssign();draw()};
+ $('#km-move').onclick=()=>{running=false;doMove();draw()};
+ $('#km-run').onclick=()=>{if(reduce){let g=0;while(!converged()&&g++<80){phase==='assign'?doAssign():doMove()}draw();return}running=true;loop(t=>{if(!running)return false;if(t-lastT>380){lastT=t;if(converged()){running=false;draw();return false}phase==='assign'?doAssign():doMove();draw()}})};
+ $('#km-init').onclick=()=>{running=false;stopLoop();init();draw()};
+ $('#km-data').onclick=()=>{running=false;stopLoop();dseed++;gen();settle();draw()};
+ $('#km-k').oninput=e=>{k=+e.target.value;running=false;stopLoop();settle();draw()};
+ cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect();const F=frame(r.width,r.height);const x=F.ix(e.clientX-r.left),y=F.iy(e.clientY-r.top);if(x<0||x>1||y<0||y>1)return;pts.push([x,y]);if(lab)lab=kmAssign(pts,cent);hist=lab?[kmJ(pts,lab,cent)]:[];phase='move';draw()});
+ gen();settle();
+ hooks['K-means']={enter:draw,leave(){running=false},resize:draw};
+})();
+
+// ---------- ESCOLHA DE K ----------
+(function(){let pts,res;const sets={d3:{c:[[.25,.7],[.72,.72],[.5,.25]],sd:.07},d5:{c:[[.2,.75],[.5,.82],[.8,.7],[.3,.25],[.75,.25]],sd:.055},dov:{c:[[.38,.55],[.6,.5],[.5,.32]],sd:.12}};let cur='d3';
+ function compute(){const s=sets[cur];pts=blobs(77,s.c,160,s.sd);const r=rng(9);res=[];for(let k=1;k<=8;k++){const b=kmBest(pts,k,r,6);res.push({k,J:b.J,S:k>1?silhouette(pts,b.lab,k):null,lab:b.lab})}}
+ function draw(){const P=PAL();let best=2,bs=-2;res.forEach(o=>{if(o.S!=null&&o.S>bs){bs=o.S;best=o.k}});$('#ks-best').textContent=best;
+  const a=fit($('#cv-ks-pts'));a.ctx.clearRect(0,0,a.w,a.h);const lab=res[best-1].lab;const F={sx:x=>8+x*(a.w-16),sy:y=>a.h-8-y*(a.h-16)};drawPts(a.ctx,F,pts,lab.map(l=>P[l%6]),2.6);a.ctx.fillStyle=C('--muted');a.ctx.font='10px '+C('--mono');a.ctx.fillText('agrupamento com k = '+best,10,14);
+  const b=fit($('#cv-ks-j'));drawLine(b.ctx,res.map(o=>o.J),b.w,b.h,{title:'Inércia (cotovelo)',fmt:v=>fmt(v,1),color:C('--teal'),min:0,xlabels:res.map(o=>String(o.k)),hl:best-1});
+  const c=fit($('#cv-ks-s'));const sv=res.slice(1).map(o=>o.S);drawLine(c.ctx,sv,c.w,c.h,{title:'Silhueta média',fmt:v=>fmt(v,2),color:C('--c3'),min:0,max:Math.max(.8,...sv),xlabels:res.slice(1).map(o=>String(o.k)),hl:best-2})}
+ [['ks-d3','d3'],['ks-d5','d5'],['ks-dov','dov']].forEach(([id,key])=>{$('#'+id).onclick=e=>{setPressed($$('[id^=ks-d]'),e.currentTarget);cur=key;compute();draw()}});
+ hooks['Escolha de k']={enter(){if(!res)compute();draw()},resize(){if(res)draw()}};
+})();
+
+// ---------- DBSCAN ----------
+(function(){const cv=$('#cv-db');let pts,lab,core,mode='db',hover=null;
+ function gen(){const r=rng(21);pts=[];for(let i=0;i<100;i++){const t=Math.PI*r();pts.push([Math.cos(t),Math.sin(t)])}for(let i=0;i<100;i++){const t=Math.PI*r();pts.push([1-Math.cos(t),.5-Math.sin(t)])}pts=pts.map(p=>[(p[0]+1.1)/3.2+gauss(r)*.018,(p[1]+.75)/2.0+gauss(r)*.018]);for(let i=0;i<24;i++)pts.push([.04+r()*.92,.04+r()*.92])}
+ const eps=()=>+$('#db-eps').value/100,minP=()=>+$('#db-min').value;
+ function nb(i,e){const out=[];const e2=e*e;for(let j=0;j<pts.length;j++)if(d2(pts[i],pts[j])<=e2)out.push(j);return out}
+ function dbscan(){const e=eps(),m=minP(),n=pts.length;lab=Array(n).fill(-2);core=Array(n).fill(false);const N=pts.map((_,i)=>nb(i,e));N.forEach((l,i)=>core[i]=l.length>=m);let c=0;for(let i=0;i<n;i++){if(lab[i]!==-2||!core[i])continue;lab[i]=c;const q=[...N[i]];while(q.length){const j=q.pop();if(lab[j]===-1||lab[j]===-2){if(lab[j]===-2||lab[j]===-1){lab[j]=c;if(core[j])q.push(...N[j])}}}c++}for(let i=0;i<n;i++)if(lab[i]===-2)lab[i]=-1;return c}
+ function run(){let nc;if(mode==='db'){nc=dbscan()}else{const b=kmBest(pts,2,rng(4),5);lab=b.lab;core=Array(pts.length).fill(true);nc=2}const noise=lab.filter(l=>l<0).length;
+  $('#db-epsv').innerHTML='<b>'+fmt(eps(),2)+'</b>';$('#db-minv').innerHTML='<b>'+minP()+'</b>';
+  $('#db-ro').innerHTML=(mode==='db'?'DBSCAN':'K-means')+' · grupos encontrados: <b>'+nc+'</b> · ruído: <b>'+noise+'</b> de '+pts.length+(mode==='db'?' · pontos centrais: <b>'+core.filter(Boolean).length+'</b>':'');draw()}
+ function draw(){const {ctx,w,h}=fit(cv);ctx.clearRect(0,0,w,h);const F=frame(w,h);const P=PAL();ctx.strokeStyle=C('--line');ctx.strokeRect(F.ox,F.oy,F.s,F.s);
+  pts.forEach((p,i)=>{const x=F.sx(p[0]),y=F.sy(p[1]);if(lab[i]<0){ctx.strokeStyle=C('--noise');ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x-3,y-3);ctx.lineTo(x+3,y+3);ctx.moveTo(x+3,y-3);ctx.lineTo(x-3,y+3);ctx.stroke();return}const col=P[lab[i]%6];if(core[i]){ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,3.4,0,7);ctx.fill()}else{ctx.strokeStyle=col;ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(x,y,3.2,0,7);ctx.stroke()}});
+  if(hover&&mode==='db'){const e=eps();const x=F.sx(hover[0]),y=F.sy(hover[1]);let cnt=0;pts.forEach(p=>{if(d2(p,hover)<=e*e)cnt++});ctx.strokeStyle=C('--coral');ctx.lineWidth=1.5;ctx.setLineDash([4,3]);ctx.beginPath();ctx.arc(x,y,e*F.s,0,7);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=C('--ink');ctx.font='11px '+C('--mono');ctx.fillText(cnt+' vizinhos'+(cnt>=minP()?' (central)':''),x+e*F.s+4,y)}}
+ $('#db-eps').oninput=run;$('#db-min').oninput=run;
+ $('#db-a-db').onclick=e=>{setPressed([$('#db-a-db'),$('#db-a-km')],e.currentTarget);mode='db';run()};
+ $('#db-a-km').onclick=e=>{setPressed([$('#db-a-db'),$('#db-a-km')],e.currentTarget);mode='km';run()};
+ cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();const F=frame(r.width,r.height);hover=[F.ix(e.clientX-r.left),F.iy(e.clientY-r.top)];draw()});
+ cv.addEventListener('mouseleave',()=>{hover=null;draw()});
+ gen();
+ hooks['DBSCAN']={enter:run,resize(){if(lab)draw()}};
+})();
+
+// ---------- PCA ----------
+(function(){const cv=$('#cv-pca');let pts,mu,S,pc1,seed=3,anim=null;
+ function gen(){const r=rng(seed);const th=(25+r()*50)*Math.PI/180,a=.22,b=.06;pts=[];for(let i=0;i<120;i++){const u=gauss(r)*a,v=gauss(r)*b;pts.push([.5+u*Math.cos(th)-v*Math.sin(th),.5+u*Math.sin(th)+v*Math.cos(th)])}
+  mu=[0,0];pts.forEach(p=>{mu[0]+=p[0];mu[1]+=p[1]});mu=mu.map(v=>v/pts.length);let sxx=0,syy=0,sxy=0;pts.forEach(p=>{const x=p[0]-mu[0],y=p[1]-mu[1];sxx+=x*x;syy+=y*y;sxy+=x*y});const n=pts.length-1;S=[[sxx/n,sxy/n],[sxy/n,syy/n]];
+  const tr=S[0][0]+S[1][1],det=S[0][0]*S[1][1]-S[0][1]*S[0][1],l1=tr/2+Math.sqrt(tr*tr/4-det);let vx=S[0][1],vy=l1-S[0][0];if(Math.abs(vx)+Math.abs(vy)<1e-12){vx=1;vy=0}let ang=Math.atan2(vy,vx)*180/Math.PI;if(ang<0)ang+=180;pc1={ang:Math.round(ang)%180,l1,l2:tr-l1,tr}}
+ function draw(){const deg=+$('#pca-a').value,a=deg*Math.PI/180,u=[Math.cos(a),Math.sin(a)];const {ctx,w,h}=fit(cv);ctx.clearRect(0,0,w,h);const F=frame(w,h);ctx.strokeStyle=C('--line');ctx.strokeRect(F.ox,F.oy,F.s,F.s);
+  ctx.save();ctx.beginPath();ctx.rect(F.ox,F.oy,F.s,F.s);ctx.clip();const L=.75;ctx.strokeStyle=C('--teal');ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(F.sx(mu[0]-u[0]*L),F.sy(mu[1]-u[1]*L));ctx.lineTo(F.sx(mu[0]+u[0]*L),F.sy(mu[1]+u[1]*L));ctx.stroke();
+  // eixo PC1 de referência
+  const b=pc1.ang*Math.PI/180;ctx.strokeStyle=C('--cap');ctx.setLineDash([3,4]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(F.sx(mu[0]-Math.cos(b)*L),F.sy(mu[1]-Math.sin(b)*L));ctx.lineTo(F.sx(mu[0]+Math.cos(b)*L),F.sy(mu[1]+Math.sin(b)*L));ctx.stroke();ctx.setLineDash([]);ctx.restore();
+  let err=0;const proj=pts.map(p=>{const x=p[0]-mu[0],y=p[1]-mu[1],t=x*u[0]+y*u[1];const q=[mu[0]+t*u[0],mu[1]+t*u[1]];err+=d2(p,q);return q});err/=pts.length;
+  ctx.strokeStyle=C('--coral');ctx.globalAlpha=.45;ctx.lineWidth=1;pts.forEach((p,i)=>{ctx.beginPath();ctx.moveTo(F.sx(p[0]),F.sy(p[1]));ctx.lineTo(F.sx(proj[i][0]),F.sy(proj[i][1]));ctx.stroke()});ctx.globalAlpha=1;
+  drawPts(ctx,F,pts,pts.map(()=>C('--ink')),2.6);drawPts(ctx,F,proj,proj.map(()=>C('--teal')),2.2);
+  const vr=u[0]*u[0]*S[0][0]+2*u[0]*u[1]*S[0][1]+u[1]*u[1]*S[1][1];const pct=100*vr/pc1.tr;
+  $('#pca-ret').textContent=fmt(pct,1)+'%';$('#pca-err').textContent=fmt(err*1000,2);$('#pca-av').innerHTML='<b>'+deg+'°</b>';
+  $('#pca-ro').innerHTML='1ª componente: <b>'+pc1.ang+'°</b>, λ₁ = <b>'+fmt(pc1.l1*1000,2)+'</b> · λ₂ = <b>'+fmt(pc1.l2*1000,2)+'</b> · máximo retido: <b>'+fmt(100*pc1.l1/pc1.tr,1)+'%</b> (valores ×10³; tracejado = 1ª componente)'}
+ $('#pca-a').oninput=()=>{anim=null;stopLoop();draw()};
+ $('#pca-go').onclick=()=>{const target=pc1.ang;if(reduce){$('#pca-a').value=target;draw();return}let cur=+$('#pca-a').value;let diff=((target-cur+270)%180)-90;loop(()=>{const st=Math.sign(diff)*Math.min(Math.abs(diff),2);cur=(cur+st+180)%180;diff-=st;$('#pca-a').value=Math.round(cur);draw();return Math.abs(diff)>0.01})};
+ $('#pca-new').onclick=()=>{seed++;gen();draw()};
+ gen();
+ hooks['PCA']={enter:draw,resize:draw};
+})();
+
+// ---------- APRIORI / FP-TREE ----------
+const BASKETS=[['pão','manteiga','café'],['pão','manteiga','leite'],['pão','café'],['café','leite','açúcar'],['pão','manteiga','café','leite'],['pão','queijo','presunto'],['pão','manteiga','queijo','presunto'],['café','açúcar'],['pão','manteiga','café','açúcar'],['leite','café','pão'],['queijo','presunto','pão','manteiga'],['café','leite']];
+(function(){const N=BASKETS.length;$('#ap-baskets').innerHTML=BASKETS.map((b,i)=>'<div><b>T'+String(i+1).padStart(2,'0')+'</b>'+b.join(', ')+'</div>').join('');
+ const key=s=>s.slice().sort().join('|');
+ const count=s=>BASKETS.filter(b=>s.every(x=>b.includes(x))).length;
+ function apriori(minc){const items=[...new Set(BASKETS.flat())].sort();const levels=[];let Lk=items.map(i=>[i]).filter(s=>count(s)>=minc);levels.push({k:1,cand:items.length,pruned:0,freq:Lk.length});const all=[...Lk];let k=1;
+  while(Lk.length){const set=new Set(Lk.map(key));const cands=new Map();for(let i=0;i<Lk.length;i++)for(let j=i+1;j<Lk.length;j++){const a=Lk[i].slice().sort(),b=Lk[j].slice().sort();if(a.slice(0,k-1).join('|')!==b.slice(0,k-1).join('|'))continue;const c=[...new Set([...a,...b])].sort();if(c.length===k+1)cands.set(key(c),c)}
+   if(!cands.size)break;let pruned=0;const kept=[];cands.forEach(c=>{const ok=c.every((_,x)=>set.has(key(c.filter((_,y)=>y!==x))));if(ok)kept.push(c);else pruned++});const next=kept.filter(c=>count(c)>=minc);levels.push({k:k+1,cand:cands.size,pruned,freq:next.length});all.push(...next);Lk=next;k++}
+  return{levels,all}}
+ function subsets(s){const out=[];const n=s.length;for(let m=1;m<(1<<n)-1;m++){out.push(s.filter((_,i)=>m&(1<<i)))}return out}
+ function run(){const minc=+$('#ap-sup').value,minconf=+$('#ap-conf').value/100;$('#ap-supv').innerHTML='<b>'+minc+'</b> cestas ('+fmt(100*minc/N,0)+'%)';$('#ap-confv').innerHTML='<b>'+Math.round(minconf*100)+'%</b>';
+  const R=apriori(minc);$('#ap-levels').innerHTML='<thead><tr><th>Nível k</th><th class="num">Candidatos</th><th class="num">Podados sem contar</th><th class="num">Frequentes</th></tr></thead><tbody>'+R.levels.map(l=>'<tr><td>'+l.k+'</td><td class="num">'+l.cand+'</td><td class="num">'+l.pruned+'</td><td class="num">'+l.freq+'</td></tr>').join('')+'</tbody>';
+  const rules=[];R.all.filter(s=>s.length>1).forEach(I=>{const sI=count(I)/N;subsets(I).forEach(A=>{const Cn=I.filter(x=>!A.includes(x));const conf=sI/(count(A)/N);if(conf+1e-9<minconf)return;rules.push({A,Cn,sup:sI,conf,lift:conf/(count(Cn)/N)})})});rules.sort((a,b)=>b.lift-a.lift||b.conf-a.conf);
+  $('#ap-rules').innerHTML='<thead><tr><th>Regra</th><th class="num">Suporte</th><th class="num">Confiança</th><th class="num">Lift</th></tr></thead><tbody>'+(rules.length?rules.map(r=>'<tr><td>{'+r.A.join(', ')+'} ⇒ {'+r.Cn.join(', ')+'}</td><td class="num">'+fmt(100*r.sup,0)+'%</td><td class="num">'+fmt(100*r.conf,0)+'%</td><td class="num">'+fmt(r.lift,2)+'</td></tr>').join(''):'<tr><td colspan="4">Nenhuma regra atende aos limiares.</td></tr>')+'</tbody>'}
+ $('#ap-sup').oninput=run;$('#ap-conf').oninput=run;
+ hooks['Apriori']={enter:run};
+})();
+(function(){const cv=$('#cv-fp');
+ function build(minc){const freq={};BASKETS.flat().forEach(i=>freq[i]=(freq[i]||0)+1);const order=Object.keys(freq).filter(i=>freq[i]>=minc).sort((a,b)=>freq[b]-freq[a]||a.localeCompare(b));const root={item:null,c:0,ch:[]};let inserted=0;
+  BASKETS.forEach(b=>{const t=order.filter(i=>b.includes(i));inserted+=t.length;let n=root;t.forEach(i=>{let c=n.ch.find(x=>x.item===i);if(!c){c={item:i,c:0,ch:[]};n.ch.push(c)}c.c++;n=c})});return{root,order,freq,inserted}}
+ function draw(){const minc=+$('#fp-sup').value;$('#fp-supv').innerHTML='<b>'+minc+'</b>';const T=build(minc);const {ctx,w,h}=fit(cv);ctx.clearRect(0,0,w,h);
+  let leaves=0,depth=0,nodes=0;(function lay(n,d){depth=Math.max(depth,d);if(n.item)nodes++;if(!n.ch.length){n.x=leaves++;return}n.ch.forEach(c=>lay(c,d+1));n.x=(n.ch[0].x+n.ch[n.ch.length-1].x)/2;n.d=d})(T.root,0);T.root.d=0;
+  (function setd(n,d){n.d=d;n.ch.forEach(c=>setd(c,d+1))})(T.root,0);
+  const padX=40,padY=24,X=x=>padX+(leaves<=1?(w-2*padX)/2:x/(leaves-1)*(w-2*padX)),Y=d=>padY+d/(Math.max(depth,1))*(h-2*padY);
+  ctx.strokeStyle=C('--line');ctx.lineWidth=1.5;(function edges(n){n.ch.forEach(c=>{ctx.beginPath();ctx.moveTo(X(n.x),Y(n.d));ctx.lineTo(X(c.x),Y(c.d));ctx.stroke();edges(c)})})(T.root);
+  const P=PAL(),col={};T.order.forEach((it,i)=>col[it]=P[i%6]);
+  ctx.font='600 11px '+C('--font');ctx.textAlign='center';ctx.textBaseline='middle';
+  (function nodesDraw(n){const x=X(n.x),y=Y(n.d);if(!n.item){ctx.fillStyle=C('--ink');ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill();ctx.fillStyle=C('--muted');ctx.fillText('raiz',x,y-12)}else{const t=n.item+':'+n.c;const tw=ctx.measureText(t).width+10;ctx.fillStyle=C('--card');ctx.strokeStyle=col[n.item];ctx.lineWidth=2;ctx.beginPath();ctx.roundRect?ctx.roundRect(x-tw/2,y-10,tw,20,5):ctx.rect(x-tw/2,y-10,tw,20);ctx.fill();ctx.stroke();ctx.fillStyle=C('--ink');ctx.fillText(t,x,y)}n.ch.forEach(nodesDraw)})(T.root);
+  $('#fp-ro').innerHTML='ordem por frequência: <b>'+T.order.map(i=>i+'('+T.freq[i]+')').join(' › ')+'</b> · itens inseridos: <b>'+T.inserted+'</b> · nós na árvore: <b>'+nodes+'</b>'}
+ $('#fp-sup').oninput=draw;
+ hooks['FP-Growth']={enter:draw,resize:draw};
+})();
+
+// ---------- HIERÁRQUICO ----------
+(function(){const cv=$('#cv-hc'),cd=$('#cv-hc-dend');
+ const LK={single:{n:'simples',eq:'d(A,B) = min<sub>a∈A, b∈B</sub> ‖a − b‖'},complete:{n:'completa',eq:'d(A,B) = max<sub>a∈A, b∈B</sub> ‖a − b‖'},average:{n:'média',eq:'d(A,B) = <span class="n">média</span><sub>a∈A, b∈B</sub> ‖a − b‖'},ward:{n:'Ward',eq:'Δ(A,B) = |A||B| / (|A| + |B|) · ‖μ<sub>A</sub> − μ<sub>B</sub>‖<sup>2</sup>'}};
+ let data='blobs',link='complete',pts=null,merges=null,xpos=null,maxH=1,cut=0,res=null;
+ const top=()=>maxH*1.05;
+ function genMoons(){const r=rng(5),p=[];for(let i=0;i<40;i++){const t=Math.PI*r(),up=i%2===0;let x=up?Math.cos(t):1-Math.cos(t),y=up?Math.sin(t):.5-Math.sin(t);x+=gauss(r)*.06;y+=gauss(r)*.06;p.push([.1+(x+1.1)/3.2*.8,.2+(y+.6)/1.8*.6])}return p}
+ function cluster(){const n=pts.length,ward=link==='ward';const Dm=[];for(let i=0;i<n;i++){Dm[i]=[];for(let j=0;j<n;j++){const d=d2(pts[i],pts[j]);Dm[i][j]=ward?d:Math.sqrt(d)}}
+  const size=Array(n).fill(1),active=new Set([...Array(n).keys()]),id=[...Array(n).keys()];merges=[];let next=n;
+  while(active.size>1){const act=[...active];let bi=-1,bj=-1,bd=Infinity;
+   for(let x=0;x<act.length;x++)for(let y=x+1;y<act.length;y++){const i=act[x],j=act[y];if(Dm[i][j]<bd){bd=Dm[i][j];bi=i;bj=j}}
+   const ni=size[bi],nj=size[bj];
+   for(const q of active){if(q===bi||q===bj)continue;const a=Dm[bi][q],b=Dm[bj][q];let v;
+    if(link==='single')v=Math.min(a,b);else if(link==='complete')v=Math.max(a,b);else if(link==='average')v=(ni*a+nj*b)/(ni+nj);else{const nk=size[q];v=((ni+nk)*a+(nj+nk)*b-nk*bd)/(ni+nj+nk)}
+    Dm[bi][q]=Dm[q][bi]=v}
+   merges.push({a:id[bi],b:id[bj],h:ward?Math.sqrt(bd):bd});id[bi]=next++;size[bi]=ni+nj;active.delete(bj)}
+  const order=[];const rec=q=>{if(q<n){order.push(q);return}const m=merges[q-n];rec(m.a);rec(m.b)};rec(2*n-2);
+  xpos=Array(n);order.forEach((l,i)=>xpos[l]=i);maxH=merges[merges.length-1].h}
+ function suggest(){const hs=merges.map(m=>m.h);let best=-1,bi=hs.length-1;for(let i=1;i<hs.length;i++){const g=hs[i]-hs[i-1];if(g>best){best=g;bi=i}}cut=(hs[bi]+hs[bi-1])/2;syncSlider()}
+ function syncSlider(){$('#hc-cut').value=Math.round(cut/top()*1000)}
+ function cutLabels(){const n=pts.length,lab=Array(n),nodeCl={};let c=0;
+  const mark=(q,cl)=>{if(q<n){lab[q]=cl;return}nodeCl[q]=cl;const m=merges[q-n];mark(m.a,cl);mark(m.b,cl)};
+  const rec=q=>{if(q<n||merges[q-n].h<=cut){mark(q,c++);return}const m=merges[q-n];rec(m.a);rec(m.b)};rec(2*n-2);
+  const sz=Array(c).fill(0);lab.forEach(l=>sz[l]++);const P=PAL();let pi=0;const col=sz.map(s=>s>1?P[(pi++)%6]:C('--noise'));
+  return{lab,nodeCl,count:c,col}}
+ function rebuild(){pts=data==='blobs'?blobs(23,[[.25,.72],[.72,.7],[.5,.25]],30,.065):genMoons();cluster();suggest()}
+ function draw(){res=cutLabels();const {ctx,w,h}=fit(cv);ctx.clearRect(0,0,w,h);const F=frame(w,h,12);ctx.strokeStyle=C('--line');ctx.lineWidth=1;ctx.strokeRect(F.ox,F.oy,F.s,F.s);
+  drawPts(ctx,F,pts,res.lab.map(l=>res.col[l]),4);
+  const g=fit(cd),c2=g.ctx,W=g.w,H=g.h;c2.clearRect(0,0,W,H);const n=pts.length,pad={l:34,r:8,t:16,b:12};const T=top();
+  const X=i=>pad.l+(i+.5)/n*(W-pad.l-pad.r),Y=v=>H-pad.b-v/T*(H-pad.t-pad.b);
+  const nx={},nh={};for(let i=0;i<n;i++){nx[i]=X(xpos[i]);nh[i]=0}
+  merges.forEach((m,t)=>{const q=n+t;nx[q]=(nx[m.a]+nx[m.b])/2;nh[q]=m.h;const cl=res.nodeCl[q];c2.strokeStyle=cl!=null?res.col[cl]:C('--muted');c2.lineWidth=cl!=null?2:1.3;c2.beginPath();c2.moveTo(nx[m.a],Y(nh[m.a]));c2.lineTo(nx[m.a],Y(m.h));c2.lineTo(nx[m.b],Y(m.h));c2.lineTo(nx[m.b],Y(nh[m.b]));c2.stroke()});
+  for(let i=0;i<n;i++){c2.fillStyle=res.col[res.lab[i]];c2.beginPath();c2.arc(nx[i],Y(0)+3,2,0,7);c2.fill()}
+  c2.strokeStyle=C('--line');c2.lineWidth=1;c2.beginPath();c2.moveTo(pad.l-4,pad.t);c2.lineTo(pad.l-4,H-pad.b);c2.stroke();
+  c2.font='10px '+C('--mono');c2.fillStyle=C('--muted');c2.textAlign='right';c2.fillText(fmt(maxH),pad.l-7,Y(maxH)+3);c2.fillText('0',pad.l-7,Y(0)+3);c2.textAlign='left';c2.fillText('altura',pad.l,10);
+  const yc=Y(Math.min(cut,T));c2.setLineDash([5,4]);c2.strokeStyle=C('--coral');c2.lineWidth=1.6;c2.beginPath();c2.moveTo(pad.l-4,yc);c2.lineTo(W-pad.r,yc);c2.stroke();c2.setLineDash([]);c2.fillStyle=C('--coral');c2.textAlign='right';c2.fillText('corte',W-pad.r,yc-4);
+  $('#hc-k').textContent=res.count;$('#hc-cutv').innerHTML='<b>'+fmt(cut)+'</b>';$('#hc-eq').innerHTML=LK[link].eq;
+  const last=merges.slice(-4).map(m=>fmt(m.h)).join(' · ');
+  $('#hc-ro').innerHTML='ligação <b>'+LK[link].n+'</b> · corte em <b>'+fmt(cut)+'</b> · <b>'+res.count+'</b> grupos · últimas quatro fusões: <b>'+last+'</b>'}
+ $('#hc-cut').oninput=e=>{cut=+e.target.value/1000*top();draw()};
+ cd.addEventListener('click',e=>{const r=cd.getBoundingClientRect(),pad={t:16,b:12};const v=(r.height-pad.b-(e.clientY-r.top))/(r.height-pad.t-pad.b)*top();cut=Math.max(0,Math.min(top(),v));syncSlider();draw()});
+ $('#hc-sug').onclick=()=>{suggest();draw()};
+ ['single','complete','average','ward'].forEach(l=>{$('#hc-l-'+l).onclick=e=>{link=l;setPressed($$('[id^="hc-l-"]'),e.currentTarget);cluster();suggest();draw()}});
+ ['blobs','moons'].forEach(d=>{$('#hc-d-'+d).onclick=e=>{data=d;setPressed($$('[id^="hc-d-"]'),e.currentTarget);rebuild();draw()}});
+ hooks['Hierárquico e dendrograma']={enter(){if(!merges)rebuild();draw()},resize(){if(merges)draw()}};
+})();
+
+// ---------- CNNs: DROPOUT E AUGMENTATION ----------
+(function(){const cn=$('#cv-drop'),ca=$('#cv-aug');const L=[4,8,8,2];let mask=null,mode='train',seed=3,augSeed=7,auto=false,last=0;
+ const pval=()=>+$('#dr-p').value/100;
+ function newMask(){const p=pval(),r=rng(seed++);mask=L.map((m,li)=>{const a=Array.from({length:m},()=>(li===0||li===L.length-1)?true:r()>=p);if(!a.some(Boolean))a[Math.floor(r()*m)]=true;return a})}
+ function drawNet(){const {ctx,w,h}=fit(cn);ctx.clearRect(0,0,w,h);const padx=24,pady=10,P=[];
+  L.forEach((m,li)=>{const x=padx+li*(w-2*padx)/(L.length-1);P.push(Array.from({length:m},(_,j)=>[x,pady+(j+.5)*(h-2*pady)/m]))});
+  const on=(li,j)=>mode==='infer'||mask[li][j];
+  ctx.lineWidth=1;for(let li=0;li<L.length-1;li++)P[li].forEach((a,i)=>P[li+1].forEach((b,j)=>{const act=on(li,i)&&on(li+1,j);ctx.strokeStyle=act?C('--teal'):C('--line');ctx.globalAlpha=act?.4:.25;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()}));ctx.globalAlpha=1;
+  const rad=Math.max(4,Math.min(9,(h-2*pady)/20));
+  P.forEach((col,li)=>col.forEach((p,j)=>{ctx.beginPath();ctx.arc(p[0],p[1],rad,0,7);if(on(li,j)){ctx.fillStyle=(li===0||li===L.length-1)?C('--ink'):C('--teal');ctx.fill()}else{ctx.fillStyle=C('--card');ctx.fill();ctx.strokeStyle=C('--muted');ctx.lineWidth=1.2;ctx.stroke();const q=rad*.55;ctx.beginPath();ctx.moveTo(p[0]-q,p[1]-q);ctx.lineTo(p[0]+q,p[1]+q);ctx.moveTo(p[0]+q,p[1]-q);ctx.lineTo(p[0]-q,p[1]+q);ctx.stroke()}}));
+  const p=pval(),act=mode==='infer'?16:mask[1].concat(mask[2]).filter(Boolean).length;
+  $('#dr-pv').innerHTML='<b>'+fmt(p,2)+'</b>';
+  $('#dr-ro').innerHTML=mode==='train'?'treino · ocultos ativos: <b>'+act+' de 16</b> · ativações mantidas × 1/(1−p) = <b>'+fmt(1/(1-p),2)+'</b>':'inferência · ocultos ativos: <b>16 de 16</b> · sem sorteio'}
+ const src=document.createElement('canvas');src.width=src.height=64;
+ (function(){const g=src.getContext('2d');g.fillStyle='#dfe6d8';g.fillRect(0,0,64,64);const r=rng(31);for(let i=0;i<220;i++){g.fillStyle='rgba(120,110,90,'+(.05+r()*.08)+')';g.fillRect(r()*64,r()*64,1.5,1.5)}
+  g.save();g.translate(32,33);g.rotate(-.55);g.fillStyle='#4f8a3c';g.beginPath();g.moveTo(-26,0);g.quadraticCurveTo(0,-17,26,0);g.quadraticCurveTo(0,17,-26,0);g.fill();
+  g.strokeStyle='#2f5e24';g.lineWidth=1.3;g.beginPath();g.moveTo(-30,0);g.lineTo(24,0);g.stroke();g.lineWidth=.8;for(let i=-3;i<=3;i++){if(!i)continue;const x=i*6;g.beginPath();g.moveTo(x,0);g.lineTo(x+5,-7);g.moveTo(x,0);g.lineTo(x+5,7);g.stroke()}
+  [[-8,-4,3.2],[6,5,2.6],[13,-3,2]].forEach(([x,y,s])=>{g.fillStyle='#8a5a2b';g.beginPath();g.arc(x,y,s,0,7);g.fill();g.strokeStyle='#d9c25a';g.lineWidth=.8;g.beginPath();g.arc(x,y,s+.9,0,7);g.stroke()});g.restore()})();
+ const KINDS=[['orig','original'],['shift','deslocamento'],['rot','rotação'],['flip','espelhamento'],['crop','recorte'],['bright','brilho'],['noise','ruído'],['erase','apagamento']];
+ function variant(kind,r){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle='#dfe6d8';g.fillRect(0,0,64,64);
+  if(kind==='shift')g.drawImage(src,Math.round((r()-.5)*28),Math.round((r()-.5)*28));
+  else if(kind==='rot'){g.translate(32,32);g.rotate((r()<.5?-1:1)*(.3+r()*.5));g.drawImage(src,-32,-32);g.setTransform(1,0,0,1,0,0)}
+  else if(kind==='flip'){g.translate(64,0);g.scale(-1,1);g.drawImage(src,0,0);g.setTransform(1,0,0,1,0,0)}
+  else if(kind==='crop'){const s=36+r()*14,x=r()*(64-s),y=r()*(64-s);g.drawImage(src,x,y,s,s,0,0,64,64)}
+  else{g.drawImage(src,0,0);const im=g.getImageData(0,0,64,64),d=im.data;
+   if(kind==='bright'){const b=(r()<.5?-1:1)*(25+r()*35),ct=.65+r()*.7;for(let i=0;i<d.length;i+=4)for(let ch=0;ch<3;ch++)d[i+ch]=Math.max(0,Math.min(255,(d[i+ch]-128)*ct+128+b))}
+   else if(kind==='noise'){const sd=20+r()*14;for(let i=0;i<d.length;i+=4)for(let ch=0;ch<3;ch++)d[i+ch]=Math.max(0,Math.min(255,d[i+ch]+gauss(r)*sd))}
+   g.putImageData(im,0,0);
+   if(kind==='erase'){const ew=14+r()*14,eh=14+r()*14;g.fillStyle='#808080';g.fillRect(Math.round(12+r()*(40-ew)),Math.round(12+r()*(40-eh)),ew,eh)}}
+  return c}
+ function drawAug(){const {ctx,w,h}=fit(ca);ctx.clearRect(0,0,w,h);const r=rng(augSeed);const cols=4,lab=16,gx=10,gy=6;const t=Math.min((w-gx*(cols-1))/cols,(h-2*lab-gy)/2);const ox=(w-(t*cols+gx*(cols-1)))/2;
+  ctx.imageSmoothingEnabled=false;ctx.font='10px '+C('--mono');ctx.textAlign='center';
+  KINDS.forEach(([k,nm],i)=>{const cx=ox+(i%cols)*(t+gx),cy=Math.floor(i/cols)*(t+lab+gy);const v=k==='orig'?src:variant(k,r);ctx.drawImage(v,cx,cy,t,t);ctx.strokeStyle=i===0?C('--coral'):C('--line');ctx.lineWidth=i===0?2:1;ctx.strokeRect(cx+.5,cy+.5,t-1,t-1);ctx.fillStyle=i===0?C('--ink'):C('--muted');ctx.fillText(nm,cx+t/2,cy+t+12)})}
+ function setAnim(on){auto=on&&!reduce;$('#dr-anim').setAttribute('aria-pressed',auto);$('#dr-anim').textContent=auto?'Parar':'Animar';if(auto){if(mode!=='train'){mode='train';setPressed([$('#dr-train'),$('#dr-infer')],$('#dr-train'))}loop(t=>{if(!auto)return false;if(t-last>650){last=t;newMask();drawNet()}})}else stopLoop()}
+ $('#dr-p').oninput=()=>{newMask();drawNet()};
+ $('#dr-new').onclick=()=>{if(mode!=='train'){mode='train';setPressed([$('#dr-train'),$('#dr-infer')],$('#dr-train'))}newMask();drawNet()};
+ $('#dr-train').onclick=e=>{mode='train';setPressed([$('#dr-train'),$('#dr-infer')],e.currentTarget);drawNet()};
+ $('#dr-infer').onclick=e=>{setAnim(false);mode='infer';setPressed([$('#dr-train'),$('#dr-infer')],e.currentTarget);drawNet()};
+ $('#dr-anim').onclick=()=>{if(reduce){newMask();drawNet();return}setAnim(!auto)};
+ $('#aug-new').onclick=()=>{augSeed++;drawAug()};
+ hooks['CNNs · regularização e augmentation']={enter(){if(!mask)newMask();drawNet();drawAug()},leave(){setAnim(false)},resize(){if(mask){drawNet();drawAug()}}};
+})();
+
+// ---------- REVISÃO: PERCEPTRON ----------
+(function(){const cv=$('#cv-pc');const P=[[0,0],[0,1],[1,0],[1,1]];const T={AND:[0,0,0,1],OR:[0,1,1,1],XOR:[0,1,1,0],XNOR:[1,0,0,1]};let g='AND',w=null,b,ep,last,done,lt=0;const MAXE=30,LR=.2;
+ function reset(){w=[-.3,.2];b=.1;ep=0;last=null;done=false}
+ const out=p=>(w[0]*p[0]+w[1]*p[1]+b>0)?1:0;
+ const nerr=()=>P.filter((p,i)=>out(p)!==T[g][i]).length;
+ function epoch(){let e=0;P.forEach((p,i)=>{const d=T[g][i]-out(p);if(d){e++;w[0]+=LR*d*p[0];w[1]+=LR*d*p[1];b+=LR*d}});ep++;last=e;if(e===0||ep>=MAXE)done=true}
+ function full(){reset();while(!done)epoch()}
+ function draw(){const {ctx,w:W,h:H}=fit(cv);ctx.clearRect(0,0,W,H);const s=Math.min(W,H)-28,ox=(W-s)/2,oy=(H-s)/2,lo=-.5,hi=1.5,R=hi-lo;const X=x=>ox+(x-lo)/R*s,Y=y=>oy+(1-(y-lo)/R)*s;const c1=C('--c1'),c2=C('--c2'),n=40;
+  ctx.globalAlpha=.14;for(let i=0;i<n;i++)for(let j=0;j<n;j++){const x=lo+(i+.5)/n*R,y=lo+(j+.5)/n*R;ctx.fillStyle=out([x,y])?c1:c2;ctx.fillRect(ox+i*s/n,oy+(n-1-j)*s/n,s/n+.6,s/n+.6)}ctx.globalAlpha=1;
+  ctx.strokeStyle=C('--line');ctx.lineWidth=1;ctx.strokeRect(ox,oy,s,s);
+  ctx.save();ctx.beginPath();ctx.rect(ox,oy,s,s);ctx.clip();ctx.strokeStyle=C('--ink');ctx.lineWidth=2;ctx.beginPath();if(Math.abs(w[1])>1e-9){ctx.moveTo(X(lo),Y(-(w[0]*lo+b)/w[1]));ctx.lineTo(X(hi),Y(-(w[0]*hi+b)/w[1]))}else if(Math.abs(w[0])>1e-9){const x0=-b/w[0];ctx.moveTo(X(x0),Y(lo));ctx.lineTo(X(x0),Y(hi))}ctx.stroke();ctx.restore();
+  P.forEach((p,i)=>{const y=T[g][i];ctx.fillStyle=y?c1:c2;ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),12,0,7);ctx.fill();if(out(p)!==y){ctx.strokeStyle=C('--ink');ctx.lineWidth=3;ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),18,0,7);ctx.stroke()}ctx.fillStyle='#fff';ctx.font='700 12px '+C('--mono');ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(y),X(p[0]),Y(p[1]))});
+  ctx.fillStyle=C('--muted');ctx.font='11px '+C('--mono');ctx.textBaseline='alphabetic';ctx.textAlign='center';[0,1].forEach(v=>{ctx.fillText(String(v),X(v),oy+s-4);ctx.fillText(String(v),ox+10,Y(v)+4)});ctx.textAlign='right';ctx.fillText('x₁',ox+s-6,oy+s-4);ctx.textAlign='left';ctx.fillText('x₂',ox+6,oy+14);
+  $('#pc-err').textContent=nerr();
+  $('#pc-ro').innerHTML='<b>'+g+'</b> · época <b>'+ep+'</b> · w = (<b>'+fmt(w[0])+'</b>; <b>'+fmt(w[1])+'</b>) · b = <b>'+fmt(b)+'</b> · '+(done?(last===0?'<b>convergiu</b>':'<b>não convergiu em '+MAXE+' épocas</b>'):'treinando…')}
+ ['AND','OR','XOR','XNOR'].forEach(k=>{$('#pc-'+k).onclick=e=>{stopLoop();setPressed($$('button',$('#pc-g')),e.currentTarget);g=k;full();draw()}});
+ $('#pc-train').onclick=()=>{reset();if(reduce){while(!done)epoch();draw();return}draw();lt=performance.now();loop(t=>{if(t-lt>280){lt=t;epoch();draw();if(done)return false}})};
+ hooks['Perceptron']={enter(){if(!w)full();draw()},resize(){if(w)draw()}};
+})();
+
+// ---------- REVISÃO: CONVOLUÇÃO ----------
+(function(){const st={H:28,C:1,F:32,k:3,pad:'same',s:1,pool:true};
+ function opt(id,key,vals,labels){const box=$('#'+id);vals.forEach((v,i)=>{const bt=document.createElement('button');bt.textContent=labels[i];bt.setAttribute('aria-pressed',st[key]===v?'true':'false');bt.onclick=()=>{st[key]=v;setPressed($$('button',box),bt);calc()};box.appendChild(bt)})}
+ opt('cn-c','C',[1,3],['1','3']);opt('cn-k','k',[1,3,5],['1×1','3×3','5×5']);opt('cn-p','pad',['same','valid'],['same','valid']);opt('cn-s','s',[1,2],['1','2']);opt('cn-pool','pool',[false,true],['sem','max 2×2']);
+ const nf=v=>v.toLocaleString('pt-BR');
+ function calc(){st.H=+$('#cn-h').value;st.F=+$('#cn-f').value;$('#cn-hv').innerHTML='<b>'+st.H+' × '+st.H+'</b>';$('#cn-fv').innerHTML='<b>'+st.F+'</b>';
+  const o=st.pad==='same'?Math.ceil(st.H/st.s):Math.floor((st.H-st.k)/st.s)+1,po=Math.floor(o/2),par=st.F*(st.k*st.k*st.C)+st.F;
+  const sh=[['Entrada',st.H,st.C],['Convolução',o,st.F]];if(st.pool)sh.push(['Pooling',po,st.F]);
+  $('#cn-shapes').innerHTML=sh.map((x,i)=>(i?'<span class="arr">→</span>':'')+'<div class="shape"><span class="tag">'+x[0]+'</span><span class="dim">'+x[1]+' × '+x[1]+' × '+x[2]+'</span><span class="readout">'+nf(x[1]*x[1]*x[2])+' valores</span></div>').join('');
+  $('#cn-par').textContent=nf(par);$('#cn-form').innerHTML=st.F+' × ('+st.k+' × '+st.k+' × '+st.C+') + '+st.F}
+ $('#cn-h').oninput=calc;$('#cn-f').oninput=calc;calc();
+ hooks['Camada convolucional']={enter:calc};
+})();
+
+// ---------- REVISÃO: DIVISÃO DE DADOS ----------
+(function(){let pats=null,mode='strat',seed=3;
+ function genP(){const r=rng(17);pats=[];for(let i=0;i<10;i++)pats.push({id:'P'+String(i+1).padStart(2,'0'),pos:i%5<2,n:3+Math.floor(r()*4)})}
+ function split(){const r=rng(seed),test=pats.map(p=>Array(p.n).fill(false));const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+  [true,false].forEach(c=>{if(mode==='strat'){const s=[];pats.forEach((p,i)=>{if(p.pos===c)for(let k=0;k<p.n;k++)s.push([i,k])});shuf(s);s.slice(0,Math.round(s.length*.25)).forEach(([i,k])=>test[i][k]=true)}else{const ids=shuf(pats.map((p,i)=>i).filter(i=>pats[i].pos===c));ids.slice(0,Math.max(1,Math.round(ids.length*.25))).forEach(i=>test[i].fill(true))}});return test}
+ function draw(){if(!pats)genP();const t=split();let trP=0,trN=0,teP=0,teN=0,both=0;
+  $('#sp-grid').innerHTML=pats.map((p,i)=>{const nt=t[i].filter(Boolean).length,bth=nt>0&&nt<p.n;if(bth)both++;t[i].forEach(x=>{if(x){teN++;if(p.pos)teP++}else{trN++;if(p.pos)trP++}});return '<div class="srow'+(bth?' both':'')+'"><span class="pid">'+p.id+'</span>'+t[i].map(x=>'<span class="chip'+(x?' test':'')+'">'+(p.pos?'+':'−')+'</span>').join('')+(bth?' <span class="pill">nos dois</span>':'')+'</div>'}).join('');
+  $('#sp-both').textContent=both;$('#sp-ro').innerHTML='positivos no treino: <b>'+fmt(100*trP/trN,0)+'%</b> · no teste: <b>'+fmt(100*teP/Math.max(1,teN),0)+'%</b> · amostras no teste: <b>'+teN+'</b> de '+(trN+teN)}
+ $('#sp-strat').onclick=e=>{setPressed([$('#sp-strat'),$('#sp-group')],e.currentTarget);mode='strat';draw()};
+ $('#sp-group').onclick=e=>{setPressed([$('#sp-strat'),$('#sp-group')],e.currentTarget);mode='group';draw()};
+ $('#sp-new').onclick=()=>{seed++;draw()};
+ hooks['Divisão de dados']={enter:draw};
+})();
+
+// ---------- REVISÃO: DISTRIBUIÇÃO ----------
+(function(){const cv=$('#cv-dist');let dir=1;const Z=(()=>{const r=rng(123);return Array.from({length:4000},()=>gauss(r))})();
+ const pct=(s,p)=>{const i=(s.length-1)*p,lo=Math.floor(i),hi=Math.ceil(i);return s[lo]+(s[hi]-s[lo])*(i-lo)};
+ function draw(){const a=+$('#ds-a').value/100;$('#ds-av').innerHTML='<b>'+fmt(a,2)+'</b>';const d=Z.map(z=>{const x=a<1e-6?z:(Math.exp(a*z)-1)/a;return 50+dir*10*x}).sort((u,v)=>u-v);
+  const mean=d.reduce((u,v)=>u+v,0)/d.length,med=pct(d,.5),lo=pct(d,.005),hi=pct(d,.995),B=40,cnt=Array(B).fill(0);d.forEach(v=>{if(v>=lo&&v<=hi)cnt[Math.min(B-1,Math.floor((v-lo)/(hi-lo)*B))]++});
+  const sm=cnt.map((c,i)=>(i?cnt[i-1]:c)*.25+c*.5+(i<B-1?cnt[i+1]:c)*.25);let mi=0;sm.forEach((c,i)=>{if(c>sm[mi])mi=i});const mode=lo+(mi+.5)/B*(hi-lo);
+  const {ctx,w,h}=fit(cv);ctx.clearRect(0,0,w,h);const pl=14,pr=14,pt=50,pb=44,X=v=>pl+(v-lo)/(hi-lo)*(w-pl-pr),mx=Math.max(...cnt),Y=c=>h-pb-c/mx*(h-pt-pb),bw=(w-pl-pr)/B;
+  ctx.fillStyle=C('--cap');cnt.forEach((c,i)=>ctx.fillRect(pl+i*bw+1,Y(c),Math.max(1,bw-2),h-pb-Y(c)));
+  ctx.strokeStyle=C('--line');ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pl,h-pb);ctx.lineTo(w-pr,h-pb);ctx.stroke();
+  [[mode,'moda','--c3'],[med,'mediana','--c1'],[mean,'média','--coral']].forEach(([v,l,col],k)=>{const x=X(v),y0=12+k*13;ctx.strokeStyle=C(col);ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x,y0+3);ctx.lineTo(x,h-pb);ctx.stroke();ctx.fillStyle=C(col);ctx.font='700 11px '+C('--font');ctx.textAlign=x<50?'left':(x>w-50?'right':'center');ctx.fillText(l,x,y0)});
+  const P=[[.10,'P10'],[.25,'P25'],[.50,'P50'],[.75,'P75'],[.90,'P90']].map(([q,l])=>[pct(d,q),l]);
+  ctx.font='10px '+C('--mono');ctx.textAlign='center';P.forEach(([v,l],k)=>{const x=X(v);ctx.strokeStyle=C('--ink');ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,h-pb);ctx.lineTo(x,h-pb+6);ctx.stroke();ctx.fillStyle=C('--muted');ctx.fillText(l,x,h-pb+18+(k%2)*13)});
+  // IQR
+  const x1=X(P[1][0]),x3=X(P[3][0]);ctx.strokeStyle=C('--teal');ctx.globalAlpha=.5;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x1,h-pb+2);ctx.lineTo(x3,h-pb+2);ctx.stroke();ctx.globalAlpha=1;
+  $('#ds-mean').textContent=fmt(mean,1);$('#ds-med').textContent=fmt(med,1);$('#ds-mode').textContent=fmt(mode,1);
+  $('#ds-ro').innerHTML=P.map(([v,l])=>l+' = <b>'+fmt(v,1)+'</b>').join(' · ')+' · IQR = <b>'+fmt(P[3][0]-P[1][0],1)+'</b>'}
+ $('#ds-a').oninput=draw;
+ $('#ds-r').onclick=e=>{setPressed([$('#ds-r'),$('#ds-l')],e.currentTarget);dir=1;draw()};
+ $('#ds-l').onclick=e=>{setPressed([$('#ds-r'),$('#ds-l')],e.currentTarget);dir=-1;draw()};
+ hooks['Distribuição e percentis']={enter:draw,resize:draw};
+})();
+
+// ---------- navegação ----------
+const slides=$$('.slide');let cur=0;
+function go(i,push=true){i=Math.max(0,Math.min(slides.length-1,i));const old=slides[cur];stopLoop();const ho=hooks[old.dataset.title];if(ho&&ho.leave)ho.leave();old.classList.remove('active');cur=i;const s=slides[cur];s.classList.add('active');s.scrollTop=0;
+ $('#count').textContent=(cur+1)+' / '+slides.length;$('#progbar').style.width=(100*(cur+1)/slides.length)+'%';$('#crumb').textContent='Inteligência Artificial · Aula 3 · '+s.dataset.title;
+ if(push){try{history.replaceState(null,'','#s'+(cur+1))}catch(e){location.hash='s'+(cur+1)}}const h=hooks[s.dataset.title];if(h&&h.enter)requestAnimationFrame(()=>h.enter())}
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);
+$('#notes-btn').onclick=e=>{const on=document.body.classList.toggle('show-notes');e.currentTarget.setAttribute('aria-pressed',on)};
+$('#fs-btn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1)}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(cur-1)}else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);else if(e.key==='n'||e.key==='N')$('#notes-btn').click();else if(e.key==='f'||e.key==='F')$('#fs-btn').click()});
+let tx=null;$('#stage').addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});$('#stage').addEventListener('touchend',e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>60&&!e.target.closest('input,canvas,.tw'))go(cur+(dx<0?1:-1));tx=null});
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{const h=hooks[slides[cur].dataset.title];if(h&&h.resize)h.resize()},120)});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{const h=hooks[slides[cur].dataset.title];if(h&&(h.resize||h.enter))(h.resize||h.enter)()});
+function fromHash(){const m=/^#s(\d+)$/.exec(location.hash);return m?(+m[1]-1):0}
+addEventListener('hashchange',()=>{const i=fromHash();if(i!==cur)go(i,false)});
+slides[0].classList.add('active');go(fromHash(),false);
+})();
+</script>
+
+
+</body></html>
